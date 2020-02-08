@@ -1,0 +1,51 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./main.css">
+</head>
+<body>
+    <div class="overlay">
+        <div class="chat-window box vertical closed">
+            <header>
+                Chat
+            </header>
+            <div class="chat-message-container">
+                <template class="chat-message">
+                    <div class="chat-message-header">
+                        <a id="profile-link">
+                            <img class="chat-message-picture" id="profile-picture">
+                        </a>
+                        <span class="chat-message-username" id="username"></span>
+                        <span class="chat-message-timestamp" id="timestamp"></span>
+                    </div>
+                    <div class="chat-message-body" id="body">
+
+                    </div>
+                </template>
+            </div>
+            <footer>
+                <form action='/api/message' method="post">
+                    <input name="message" type="text" placeholder="Type here to chat. Use @&lt;name&gt; to mention another user.">
+                </form>
+            </footer>
+        </div>
+        <div class="lightbox">
+            
+        </div>
+        <div class="achievement inactive">
+            <div id="achievement-image">
+                <img src="./foobar.png">
+            </div>
+            <div id="achievement-text">
+                You did it!
+            </div>
+        </div>
+    </div>
+    <div class="slideshow">
+
+        <!-- <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRg7RvcgDVWh0S1ZZ15Pzs-QyBBa6jxKbVPBNeYtafQJG5YKBq9DbwyUMU5_9F9BjtRC6ysY0l84L7i/embed?start=false&loop=false&delayms=1000" style="width: 100%; height: 100%;" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe> -->
+    </div>
+    <script src='main.js'></script>
+</body>
+</html>
