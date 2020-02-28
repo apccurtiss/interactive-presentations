@@ -1,3 +1,14 @@
+import { websocket } from './websocket.js';
+
+let ws = new websocket((tag, message) => {
+    console.log(`Got message: "${message}" with tag "${tag}"`);
+})
+
+console.log('Sending test tag 1')
+ws.send('test_tag', 'test_message');
+ws.send('test_tag2', 'test_message2');
+console.log('Done!')
+
 // https://stackoverflow.com/a/6234804
 function escapeHTML(unsafe) {
     return unsafe
@@ -6,6 +17,10 @@ function escapeHTML(unsafe) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+if (window.WebSocket === undefined) {
+    document.innerHTML = "This webpage requires a newer browser, sorry!";
 }
 
 let chat_message_template = document.querySelector('template.chat-message');
