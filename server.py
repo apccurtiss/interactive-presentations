@@ -1,4 +1,6 @@
+import cgi
 import logging
+import json
 
 from flask import (
     Flask,
@@ -8,18 +10,25 @@ from flask import (
     request,
     session,
     url_for)
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_sockets import Sockets
 from gevent import pywsgi
 from geventwebsocket.handler import WebSocketHandler
 from geventwebsocket import WebSocketServer, WebSocketApplication, Resource
+from profanity_filter import ProfanityFilter
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
+
+pf = ProfanityFilter(languages=['en'])
 
 app = Flask(__name__)
 app.secret_key = 'My super secret key!'
 app._static_folder = 'static'
 sockets = Sockets(app)
+
+limiter = Limiter(app, key_func=get_remote_address)
 
 websockets = []
 
@@ -29,13 +38,37 @@ def echo_socket(ws):
     websockets.append(ws)
 
 
-@app.route('/')
-def index():
-    logger.info(session)
+@app.before_request
+def check_username():
     if 'username' not in session:
         return redirect(url_for('signup'))
-    else:
-        return render_template('index.html')
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/message', methods=['POST'])
+@limiter.limit("15/minute")
+def receive_message():
+    try:
+        message = pf.censor(request.form['message'])
+    except KeyError:
+        return ('Invalid request: No "message" field attached.', 400)
+
+    if len(message) > 200:
+        return ('Message is too long.', 400) 
+
+    username = session['username']
+    
+    logger.info(f'{username}: {message}')
+    emit('message', {
+        'content': message,
+        'username': username
+    })
+    
+    return ('success', 200)
 
 
 @app.route('/signup', methods=['GET'])
@@ -51,7 +84,7 @@ def signup_post():
 
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('has_admin_access', 'false')
-    return resp
+    emit('message', request.form['content'])
 
 
 @app.route('/logout', methods=['POST'])
@@ -64,7 +97,7 @@ def logout():
 def emit(tag, message):
     for ws in websockets:
         if not ws.closed:
-            ws.send(f'{tag}:{message}')
+            ws.send(f'{tag}:{json.dumps(message)}')
 
 
 def handle(tag, message):

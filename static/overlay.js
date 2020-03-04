@@ -1,17 +1,17 @@
 import { websocket } from './websocket.js';
 
-let ws = new websocket((tag, content) => {
-    switch (tag) {
-        case 'message':
-            onmessage(content)
-        case 'slide_change':
-            onSlideChange(Number(content))
-        case 'achievement':
-            onAchievement(content)
-        default:
-            console.error(`Unknown tag: ${tag}`)
-    }
-})
+// let ws = new websocket((tag, content) => {
+//     switch (tag) {
+//         case 'message':
+//             onmessage(content);
+//         case 'slide_change':
+//             onSlideChange(Number(content));
+//         case 'achievement':
+//             onAchievement(content);
+//         default:
+//             console.error(`Unknown tag: ${tag}`);
+//     }
+// })
 
 // https://stackoverflow.com/a/6234804
 function escapeHTML(unsafe) {
@@ -77,4 +77,28 @@ function onNewMessage(message) {
         (match) => `<span class="mention">${match}</span>`);
         
     addMessage(message.username, message.sent, message_html);
+}
+
+let chat = document.getElementById('chat-input');
+function chatError(message) {
+    console.error(message);
+}
+chat.onsubmit = function() {
+    fetch('/message', {
+        method: 'post',
+        mode: 'same-origin',
+        credentials: 'same-origin',
+        body: new FormData(chat),
+    }).then((response) => {
+        if(response.status == 429) {
+            chatError('Too many messages. Please wait a moment before trying again.');
+        }
+        else if(response.status != 200) {
+            response.text().then(chatError);
+        }
+    }).catch((error) => {
+        chatError(error);
+    });
+
+    return false;
 }

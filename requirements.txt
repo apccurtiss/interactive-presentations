@@ -1,2 +1,4 @@
 flask
 flask_sockets
+Flask-Limiter
+profanity_filter

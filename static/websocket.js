@@ -1,5 +1,3 @@
-import { inherits } from "util";
-
 export function websocket(callback) {
     let uri = "ws://127.0.0.1:5000/socket";
     let websocket;

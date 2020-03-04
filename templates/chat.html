@@ -17,8 +17,10 @@
         </template>
     </div>
     <footer>
-        <form action='/api/message' method="post">
-            <input name="message" type="text" placeholder="Type here to chat. Use @&lt;name&gt; to mention another user.">
+        <form action="/message" method="POST" id="chat-input">
+            <input name="message" type="text" maxlength="200" placeholder="Type here to chat. Use @&lt;name&gt; to mention another user.">
+            <input type="submit">
         </form>
+        <script type="module" src="static/overlay.js"></script>
     </footer>
 </div>
