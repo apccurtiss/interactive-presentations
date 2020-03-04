@@ -35,7 +35,7 @@ def index():
     if 'username' not in session:
         return redirect(url_for('signup'))
     else:
-        return render_template('presentation.html')
+        return render_template('index.html')
 
 
 @app.route('/signup', methods=['GET'])
@@ -45,13 +45,20 @@ def signup():
 
 @app.route('/signup', methods=['POST'])
 def signup_post():
-    logger.debug(f'User joined: {request.form["username"]}')
+    logger.info(f'User joined: {request.form["username"]}')
 
     session['username'] = request.form['username']
 
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('has_admin_access', 'false')
     return resp
+
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    del session['username']
+
+    return redirect(url_for('index'))
 
 
 def emit(tag, message):

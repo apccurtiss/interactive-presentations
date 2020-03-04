@@ -1,0 +1,24 @@
+<div class="chat-window box vertical closed">
+    <header>
+        Chat
+    </header>
+    <div class="chat-message-container">
+        <template class="chat-message">
+            <div class="chat-message-header">
+                <a id="profile-link">
+                    <img class="chat-message-picture" id="profile-picture">
+                </a>
+                <span class="chat-message-username" id="username"></span>
+                <span class="chat-message-timestamp" id="timestamp"></span>
+            </div>
+            <div class="chat-message-body" id="body">
+
+            </div>
+        </template>
+    </div>
+    <footer>
+        <form action='/api/message' method="post">
+            <input name="message" type="text" placeholder="Type here to chat. Use @&lt;name&gt; to mention another user.">
+        </form>
+    </footer>
+</div>

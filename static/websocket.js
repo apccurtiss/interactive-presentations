@@ -1,45 +1,26 @@
+import { inherits } from "util";
+
 export function websocket(callback) {
     let uri = "ws://127.0.0.1:5000/socket";
-    let websocket = new WebSocket(uri);
-    let queued_message_args = [];
-    let ready = false;
+    let websocket;
+    init();
 
-    let send = function(tag, message) {
-        if (ready) {
-            websocket.send(`${tag}:${message}`);
-        }
-        else {
-            console.log('Socket not ready, queuing for later.');
-            queued_message_args.push(arguments);
-        }
-    };
-
-    websocket.onmessage = function(event) {
-        let [tag, message] = event.data.split(':', 1);
-        callback(tag, message);
-    };
-
-    websocket.onopen = function(evt) {
-        ready = true;
-        while(queued_message_args.length > 0) {
-            console.log(`Sending queued message; ${queued_message_args.length} remaining.`);
-            let message_args = queued_message_args.shift();
-            send(...message_args);
-        }
-    };
-
-    websocket.onclose = function(evt) {
-        ready = false;
+    function init() {
         websocket = new WebSocket(uri);
-    };
+        websocket.onmessage = function(event) {
+            let [tag, message] = event.data.split(':', 1);
+            callback(tag, JSON.parse(message));
+        };
 
-    websocket.onerror = function(evt) {
-        console.log('Error: ', evt);
-        ready = false;
-        websocket = new WebSocket(uri);
-    };
+        websocket.onclose = function(evt) {
+            init();
+        };
 
-    this.send = send;
+        websocket.onerror = function(evt) {
+            console.error(evt);
+            init();
+        };
+    }
 }
     
 function onOpen(evt) {
