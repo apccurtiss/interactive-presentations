@@ -31,7 +31,26 @@
     <div class="overlay">
         {% include 'exercises.html' %}
         {% include 'chat.html' %}
-        <script type="module" src="static/overlay.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+		<script type="text/javascript" charset="utf-8">
+			var socket = io();
+			socket.on('connect', function() {
+				socket.emit('chat_message', 'testsadfqwer');
+			});
+			socket.on('chat_message', function(data) {
+				console.log(data)
+			})
+
+			let chat = document.getElementById('chat');
+			let chat_input = document.getElementById('chat-input');
+			function chatError(message) {
+				console.error(message);
+			}
+			chat.onsubmit = function() {
+				socket.emit('chat_message', chat_input.value);
+				return false;
+			}
+		</script>
     </div>
     <div class="slideshow">
         {% include 'presentation.html' %}

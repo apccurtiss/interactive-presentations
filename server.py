@@ -1,10 +1,12 @@
+
 import cgi
-from datetime import time
+from datetime import datetime
 import logging
 import json
 import os
 import random
 import string
+
 
 from flask import (
     Flask,
@@ -16,27 +18,37 @@ from flask import (
     url_for)
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from flask_sockets import Sockets
-from gevent import pywsgi
-from geventwebsocket.handler import WebSocketHandler
-from geventwebsocket import WebSocketError, WebSocketServer, WebSocketApplication, Resource
+from flask_socketio import emit, send, SocketIO
 from profanity_filter import ProfanityFilter
 
-logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 pf = ProfanityFilter(languages=['en'])
 
 app = Flask(__name__)
 app.secret_key = 'My super secret key!'
 app._static_folder = 'static'
-sockets = Sockets(app)
+socketio = SocketIO(app)
 
 limiter = Limiter(app, key_func=get_remote_address)
 
 PHOTO_PATH = 'static/data/profile_photos'
 
-websockets = {}
+
+@socketio.on('json')
+def handle_json(json):
+    send(json, json=True)
+
+
+@socketio.on('chat_message')
+def handle_chat_message(message):
+    logging.info(f'{session["username"]} says: {message}')
+    emit('chat_message', {
+        'content': message,
+        'user': session["username"],
+        'sent': str(datetime.now())
+    }, json=True, broadcast=True)
 
 
 @app.errorhandler(429)
@@ -44,19 +56,19 @@ def ratelimit_handler(e):
     return ('Too many messages. Please wait a moment and try again.', 429)
 
 
-@sockets.route('/socket')
-def echo_socket(ws):
-    unique_id = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
-    websockets[unique_id] = ws
+# @sockets.route('/socket')
+# def echo_socket(ws):
+#     unique_id = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
+#     websockets[unique_id] = ws
 
-    while True:
-        try:
-            ws.receive()
-        except WebSocketError:
-            break
+#     while True:
+#         try:
+#             ws.receive()
+#         except WebSocketError:
+#             break
 
-    logger.info(f'Closing websocket: {unique_id}')
-    del websockets[unique_id]
+#     logger.info(f'Closing websocket: {unique_id}')
+#     del websockets[unique_id]
             
 
 @app.before_request
@@ -86,7 +98,7 @@ def receive_message():
     logger.info(f'{username}: {message}')
     emit('message', {
         'content': message,
-        'sent': time.now(),
+        'sent': datetime.now(),
         'username': username
     })
     
@@ -117,17 +129,12 @@ def logout():
     return redirect(url_for('index'))
 
 
-def emit(tag, message):
-    for ws in websockets:
-        if not ws.closed:
-            ws.send(f'{tag}:{json.dumps(message)}')
-
-
 def handle(tag, message):
     print(f'Got message: "{message}" with tag: "{tag}"')
 
 if __name__ == "__main__":
-    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
+    # server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
 
-    server.serve_forever()
+    # server.serve_forever()
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
     # app.run(debug=True, host='0.0.0.0', port=5000)
