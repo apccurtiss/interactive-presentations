@@ -43,33 +43,19 @@ def handle_json(json):
 
 @socketio.on('chat_message')
 def handle_chat_message(message):
-    logging.info(f'{session["username"]} says: {message}')
+    user = session["username"]
+    logging.info(f'{user} says: {message}')
+
+    if len(message) > 200:
+        emit('chat_error', 'Message was too long.')
+
+    censored_message = pf.censor(message)
     emit('chat_message', {
-        'content': message,
-        'user': session["username"],
-        'sent': str(datetime.now())
+        'content': censored_message,
+        'username': user,
+        'time': str(datetime.now())
     }, json=True, broadcast=True)
 
-
-@app.errorhandler(429)
-def ratelimit_handler(e):
-    return ('Too many messages. Please wait a moment and try again.', 429)
-
-
-# @sockets.route('/socket')
-# def echo_socket(ws):
-#     unique_id = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
-#     websockets[unique_id] = ws
-
-#     while True:
-#         try:
-#             ws.receive()
-#         except WebSocketError:
-#             break
-
-#     logger.info(f'Closing websocket: {unique_id}')
-#     del websockets[unique_id]
-            
 
 @app.before_request
 def check_username():
@@ -80,29 +66,6 @@ def check_username():
 @app.route('/')
 def index():
     return render_template('index.html')
-
-
-@app.route('/message', methods=['POST'])
-@limiter.limit("15/minute")
-def receive_message():
-    try:
-        message = pf.censor(request.form['message'])
-    except KeyError:
-        return ('Invalid request: No "message" field attached.', 400)
-
-    if len(message) > 200:
-        return ('Message is too long.', 400) 
-
-    username = session['username']
-    
-    logger.info(f'{username}: {message}')
-    emit('message', {
-        'content': message,
-        'sent': datetime.now(),
-        'username': username
-    })
-    
-    return ('success', 200)
 
 
 @app.route('/signup', methods=['GET'])
