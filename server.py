@@ -1,6 +1,10 @@
 import cgi
+from datetime import time
 import logging
 import json
+import os
+import random
+import string
 
 from flask import (
     Flask,
@@ -15,11 +19,11 @@ from flask_limiter.util import get_remote_address
 from flask_sockets import Sockets
 from gevent import pywsgi
 from geventwebsocket.handler import WebSocketHandler
-from geventwebsocket import WebSocketServer, WebSocketApplication, Resource
+from geventwebsocket import WebSocketError, WebSocketServer, WebSocketApplication, Resource
 from profanity_filter import ProfanityFilter
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 pf = ProfanityFilter(languages=['en'])
 
@@ -30,17 +34,34 @@ sockets = Sockets(app)
 
 limiter = Limiter(app, key_func=get_remote_address)
 
-websockets = []
+PHOTO_PATH = 'static/data/profile_photos'
+
+websockets = {}
 
 
-@sockets.route('/socket', handler=WebSocketHandler)
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return ('Too many messages. Please wait a moment and try again.', 429)
+
+
+@sockets.route('/socket')
 def echo_socket(ws):
-    websockets.append(ws)
+    unique_id = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
+    websockets[unique_id] = ws
 
+    while True:
+        try:
+            ws.receive()
+        except WebSocketError:
+            break
+
+    logger.info(f'Closing websocket: {unique_id}')
+    del websockets[unique_id]
+            
 
 @app.before_request
 def check_username():
-    if 'username' not in session:
+    if 'username' not in session and request.endpoint not in ['signup', 'signup_post']:
         return redirect(url_for('signup'))
 
 
@@ -65,6 +86,7 @@ def receive_message():
     logger.info(f'{username}: {message}')
     emit('message', {
         'content': message,
+        'sent': time.now(),
         'username': username
     })
     
@@ -84,7 +106,8 @@ def signup_post():
 
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('has_admin_access', 'false')
-    emit('message', request.form['content'])
+
+    return redirect(url_for('index'))
 
 
 @app.route('/logout', methods=['POST'])
@@ -104,7 +127,7 @@ def handle(tag, message):
     print(f'Got message: "{message}" with tag: "{tag}"')
 
 if __name__ == "__main__":
-    # server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
+    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
 
-    # server.serve_forever()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    server.serve_forever()
+    # app.run(debug=True, host='0.0.0.0', port=5000)
