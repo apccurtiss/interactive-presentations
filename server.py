@@ -34,16 +34,17 @@ socketio = SocketIO(app)
 limiter = Limiter(app, key_func=get_remote_address)
 
 PHOTO_PATH = 'static/data/profile_photos'
+sessions = {}
 
 
-@socketio.on('json')
-def handle_json(json):
-    send(json, json=True)
+@socketio.on('connect')
+def test_connect():
+    emit('my response', {'data': 'Connected'})
 
 
 @socketio.on('chat_message')
 def handle_chat_message(message):
-    user = session["username"]
+    user = session['username']
     logging.info(f'{user} says: {message}')
 
     if len(message) > 200:
@@ -54,13 +55,41 @@ def handle_chat_message(message):
         'content': censored_message,
         'username': user,
         'time': datetime.now().strftime('%I:%M%p').lower().strip('0')
+    }, json=True, broadcast=True, include_self=False)
+
+
+def handle_achievement(user, achievement):
+    logging.info(f'{user} got achievement: {achievement}')
+
+    emit('achievement', {
+        'username': user,
+        'username': user,
+        'time': datetime.now().strftime('%I:%M%p').lower().strip('0')
     }, json=True, broadcast=True)
 
 
 @app.before_request
 def check_username():
-    if 'username' not in session and request.endpoint not in ['signup', 'signup_post']:
+    route_whitelist = ['signup', 'signup_post', 'handle_csp']
+    if 'username' not in session and request.endpoint not in route_whitelist:
         return redirect(url_for('signup'))
+
+
+@app.after_request
+def apply_csp(response):
+    response.headers['Content-Security-Policy-Report-Only'] = (
+        'default-src \'none\';'
+        'style-src cdn.example.com;'
+        'report-uri /csp'
+    )
+    return response
+
+
+@app.route('/csp', methods=['POST'])
+def handle_csp():
+    print('CSP report:')
+    print(request.data)
+    return 'ok'
 
 
 @app.route('/')

@@ -1,4 +1,4 @@
 flask
-flask_sockets
+flask-socketio
 Flask-Limiter
 profanity_filter
