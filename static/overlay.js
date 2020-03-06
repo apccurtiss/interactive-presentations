@@ -12,23 +12,26 @@ socket.on('slide_change', function(new_slide) {
     onSlideChange(new_slide);
 })
 
-let chat = document.getElementById('chat');
+let chat = document.getElementById('chat-form');
 let chat_input = document.getElementById('chat-input');
 chat.onsubmit = function() {
-    socket.emit('chat_message', chat_input.value);
+    let message = chat_input.value;
+    chat_input.value = '';
+    socket.emit('chat_message', message);
     return false;
 }
 
-let chat_message_template = document.querySelector('template.chat-message');
+let chat_message_template = document.querySelector('template.chat-message-template');
 let chat_message_containers = Array.from(document.querySelectorAll('.chat-message-container'));
 function addNewMessage(author_username, time_str, message_content) {
     let new_message = chat_message_template.content.cloneNode(true);
     
     let new_picture = new_message.getElementById('profile-picture');
-    new_picture.setAttribute('src', `data/profile_photos/${author_username}`);
+    // new_picture.setAttribute('src', `static/data/profile_photos/${author_username}`);
+    new_picture.setAttribute('src', `static/data/profile_photos/default.jpeg`);
     new_picture.setAttribute('alt', `Profile picture for user ${author_username}`);
     new_message.getElementById('profile-link').setAttribute('href', `./users/${author_username}`);
-    new_message.getElementById('username').textContent = author_username;
+    new_message.getElementById('username').textContent = `@${author_username}`;
     new_message.getElementById('timestamp').textContent = time_str;
     let new_body = new_message.getElementById('body');
     // Important!

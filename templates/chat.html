@@ -2,22 +2,25 @@
     <header>
         Group chat
     </header>
-    <div class="chat-message-container">
-        <template class="chat-message">
-            <div class="chat-message-header">
+    <div class="chat-message-container box vertical">
+        <template class="chat-message-template">
+            <div class="chat-message">
                 <a id="profile-link">
-                    <img class="chat-message-picture" id="profile-picture">
+                    <img class="chat-message-picture hidden" id="profile-picture" onload="this.classList.remove('hidden')">
                 </a>
-                <span class="chat-message-username" id="username"></span>
-                <span class="chat-message-timestamp" id="timestamp"></span>
-            </div>
-            <div class="chat-message-body" id="body">
-
+                <div class="chat-message-text">
+                    <div class="chat-message-header">
+                        <span class="chat-message-username" id="username"></span>
+                        <span class="chat-message-timestamp" id="timestamp"></span>
+                    </div>
+                    <div class="chat-message-body" id="body">
+                    </div>
+                </div>
             </div>
         </template>
     </div>
     <footer>
-        <form id="chat">
+        <form id="chat-form">
             <input id="chat-input" name="message" type="text" maxlength="200" placeholder="Type here to chat. Use @&lt;name&gt; to mention another user.">
         </form>
     </footer>

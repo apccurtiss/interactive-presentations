@@ -1,6 +1,9 @@
 /* Remove default margins */
 * {
     margin: 0;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 }
 
 .box {
@@ -12,9 +15,14 @@
     flex-direction: column;
 }
 
-.box * {
+.box > * {
     display: flex;
     flex: 1 0;
+}
+
+.box template {
+    display: initial;
+    flex: none;
 }
 
 .box header, .box footer {
@@ -40,8 +48,64 @@
     width: 500px;
     height: 600px;
     transition: .2s;
-    background-color: blue;
-    color: white;
+    background-color: #fff;
+    color: #000;
+    font-family: sans-serif;
+}
+
+.chat-window > header {
+    font-weight: bold;
+    padding: .5em;
+}
+
+.chat-message-container {
+    overflow-y: scroll;
+    justify-content: flex-start;
+}
+
+.chat-message {
+    flex: 0 0;
+    padding: 0 0 1em 0;
+}
+
+.chat-message-picture {
+    width: 2em;
+    height: 2em;
+    border-radius: 1em;
+    margin-right: .5em;
+    transition: .2s;
+}
+
+.chat-message-picture.hidden {
+    opacity: 0;
+}
+
+.chat-message-username {
+    font-weight: bold;
+}
+
+.chat-message-timestamp {
+    font-style: italic;
+    color: #888;
+}
+
+.chat-message-header {
+    margin-bottom: .2em;
+}
+
+#chat-form {
+    width: 100%;
+}
+
+#chat-input {
+    width: calc(100% - 1em);
+    border-radius: .2em;
+    padding: .5em;
+    margin: .5em;
+}   
+
+.mention {
+    color: #f66;
 }
 
 .sidebar::before {

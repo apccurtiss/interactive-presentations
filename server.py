@@ -53,7 +53,7 @@ def handle_chat_message(message):
     emit('chat_message', {
         'content': censored_message,
         'username': user,
-        'time': str(datetime.now())
+        'time': datetime.now().strftime('%I:%M%p').lower().strip('0')
     }, json=True, broadcast=True)
 
 
@@ -99,5 +99,5 @@ if __name__ == "__main__":
     # server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
 
     # server.serve_forever()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5001)
     # app.run(debug=True, host='0.0.0.0', port=5000)
