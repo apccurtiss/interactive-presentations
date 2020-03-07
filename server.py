@@ -1,6 +1,7 @@
 
 import cgi
 from datetime import datetime
+import functools
 import logging
 import json
 import os
@@ -10,6 +11,7 @@ import string
 
 from flask import (
     Flask,
+    jsonify,
     make_response,
     redirect,
     render_template,
@@ -34,7 +36,21 @@ socketio = SocketIO(app)
 limiter = Limiter(app, key_func=get_remote_address)
 
 PHOTO_PATH = 'static/data/profile_photos'
-sessions = {}
+photos = list(enumerate(os.path.join(PHOTO_PATH, f) for f in os.listdir(PHOTO_PATH)))
+
+users = {
+    'admin': '/static/data/profile_photos/admin.jpg'
+}
+
+def requires_auth(f):
+    @functools.wraps(f)
+    def decorator(*pargs, **kwargs):
+        if session.get('username') not in users:
+            return redirect(url_for('signup'))
+        else:
+            return f(*pargs, **kwargs)
+
+    return decorator
 
 
 @socketio.on('connect')
@@ -55,7 +71,17 @@ def handle_chat_message(message):
         'content': censored_message,
         'username': user,
         'time': datetime.now().strftime('%I:%M%p').lower().strip('0')
-    }, json=True, broadcast=True, include_self=False)
+    }, json=True, broadcast=True)
+
+
+@app.route('/api/users')
+def get_all_users():
+    return json.dumps(users.keys())
+
+
+@app.route('/api/user/<user>')
+def get_user(user):
+    return jsonify(users.get(user, None))
 
 
 def handle_achievement(user, achievement):
@@ -68,14 +94,7 @@ def handle_achievement(user, achievement):
     }, json=True, broadcast=True)
 
 
-@app.before_request
-def check_username():
-    route_whitelist = ['signup', 'signup_post', 'handle_csp']
-    if 'username' not in session and request.endpoint not in route_whitelist:
-        return redirect(url_for('signup'))
-
-
-@app.after_request
+# @app.after_request
 def apply_csp(response):
     response.headers['Content-Security-Policy-Report-Only'] = (
         'default-src \'none\';'
@@ -93,20 +112,37 @@ def handle_csp():
 
 
 @app.route('/')
+@requires_auth
 def index():
     return render_template('index.html')
 
 
 @app.route('/signup', methods=['GET'])
 def signup():
-    return render_template('signup.html')
+    if session.get('username') in users:
+        return redirect(url_for('index'))
+
+    return render_template('signup.html', photos=photos)
 
 
 @app.route('/signup', methods=['POST'])
 def signup_post():
     logger.info(f'User joined: {request.form["username"]}')
 
-    session['username'] = request.form['username']
+    try:
+        username = request.form['username'].lower()
+        if pf.is_profane(username):
+            logger.warning(f'Potentially profane username: {username}')
+            return ('Username may be profane. Please keep it civil.', 400)
+        if username in users:
+            logger.info(f'Username taken: {username}')
+            return ('Username already taken!', 409)
+
+
+        users[username] = photos[int(request.form['photo'])]
+        session['username'] = username
+    except:
+        return ('Invalid request', 400)
 
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('has_admin_access', 'false')
@@ -118,7 +154,7 @@ def signup_post():
 def logout():
     del session['username']
 
-    return redirect(url_for('index'))
+    return redirect(url_for('signup'))
 
 
 def handle(tag, message):

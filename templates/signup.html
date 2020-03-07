@@ -1,3 +1,32 @@
-<form action="signup" method="POST">
-    <input type="text" name="username">
-</form>
+<!doctype html>
+<html class="fill">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>Web Security Basics</title>
+
+	<link rel="stylesheet" href="static/common.css">
+	<link rel="stylesheet" href="static/signup.css">
+</head>
+<body class="fill">
+    <form id="signup" class="box vertical fill" action="signup" method="POST">
+        <div id="error"></div>
+        <label for="username">Choose a name</label>
+        <input id="username" type="text" name="username">
+        
+        <label>And a picture</label>
+        <div class="photos box">
+            {% for key, url in photos %}
+            <label>
+                <input type="radio" name="photo" value="{{ key }}" checked>
+                <img src="{{ url }}" class="faded-out t2s" onload="this.classList.remove('faded-out')">
+            </label>
+            {% endfor %}
+        </div>
+
+        <input class="signup-button" type="submit" value="Sign up!">
+    </form>
+    <script src="static/signup.js"></script>
+</body>
+</html>

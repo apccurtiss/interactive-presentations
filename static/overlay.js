@@ -21,8 +21,15 @@ chat.onsubmit = function() {
     return false;
 }
 
+
 let chat_message_template = document.querySelector('template.chat-message-template');
-let chat_message_containers = Array.from(document.querySelectorAll('.chat-message-container'));
+let chat_message_container = document.getElementById('chat-message-container');
+let scrolled = false;
+chat_message_container.onscroll = () => {
+    scrolled = chat_message_container.scrollTop != chat_message_container.scrollTopMax;
+    console.log("Scrolled: ", scrolled)
+    console.log(chat_message_container)
+}
 function addNewMessage(author_username, time_str, message_content) {
     let new_message = chat_message_template.content.cloneNode(true);
     
@@ -41,7 +48,10 @@ function addNewMessage(author_username, time_str, message_content) {
         /@\w+/g, (s) => `<span class="mention">${s}</span>`);
     
     // We're not really expecting multiple chat containers, but who knows?
-    chat_message_containers.map((container) => container.appendChild(new_message))
+    chat_message_container.appendChild(new_message);
+    if(!scrolled) {
+        chat_message_container.scrollTop = chat_message_container.scrollTopMax;
+    }
 }
 
 function onSlideChange(slide_no) {

@@ -1,0 +1,74 @@
+body {
+    background-color: #000;
+    color: #FFF;
+    font-family: sans-serif;
+    font-size: 1.5em;
+}
+
+#signup {
+    align-items: center;
+    justify-content: center;
+}
+
+#signup > * {
+    flex: none;
+}
+
+#username {
+    border-radius: .2em;
+    width: 200px;
+    font-size: 1em;
+    padding: .5em;
+}
+
+#error {
+    background-color: #FCC;
+    color: #000;
+    border-radius: .2em;
+    display: none;
+    padding: .5em;
+}
+
+#error.visible {
+    display: initial; 
+}
+
+.photos > * {
+    flex: 0 0;
+}
+
+.photos {
+    flex-wrap: wrap;
+    padding: 0 20% 0 20%;
+    justify-content: center;
+    overflow-y: auto;
+}
+
+.signup-button {
+    font-size: 1em;
+    padding: .2em;
+    border-radius: .2em;
+}
+
+/* Styling for the radio button images */
+[type=radio] { 
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+[type=radio] + img {
+    width: 150px;
+    height: 150px;
+    margin: 0.5em;
+    cursor: pointer;
+}
+
+[type=radio]:checked + img {
+    box-shadow: 0 0 5px 5px #FFF;
+}
+
+[type=radio]:hover + img {
+    box-shadow: 0 0 5px 5px #FFF;
+}
