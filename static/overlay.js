@@ -110,3 +110,14 @@ chat_button.onclick = () => {
     chat_window.classList.toggle('hidden');
     chat_button.classList.toggle('toggled');
 }
+
+let content_iframe = document.getElementById('content-iframe');
+let challenges_button = document.getElementById('challenges-button');
+challenges_button.onclick = (...x) => {
+    content_iframe.setAttribute('src', '/exercises');
+}
+
+let presentation_button = document.getElementById('presentation-button');
+presentation_button.onclick = () => {
+    content_iframe.setAttribute('src', '/presentation');
+}

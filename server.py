@@ -179,6 +179,18 @@ def index():
     return render_template('index.html', username=user.username, profile_photo=user.profile_photo)
 
 
+@app.route('/presentation')
+@requires_auth
+def presentation():
+    return render_template('presentation.html')
+
+
+@app.route('/exercises')
+@requires_auth
+def exercises():
+    return render_template('exercises.html')
+
+
 @app.route('/signup', methods=['GET'])
 def signup():
     if 'uid' in session and Users.get_id(session['uid']):

@@ -10,23 +10,6 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" href="static/common.css">
 	<link rel="stylesheet" href="static/presentation.css">
-
-	<!-- Presentation -->
-	<link rel="stylesheet" href="static/reveal/css/reset.css">
-	<link rel="stylesheet" href="static/reveal/css/reveal.css">
-	<link rel="stylesheet" href="static/reveal/css/theme/black.css">
-
-	<!-- Theme used for syntax highlighting of code -->
-	<link rel="stylesheet" href="static/reveal/lib/css/monokai.css">
-
-	<!-- Printing and PDF exports -->
-	<script>
-		var link = document.createElement( 'link' );
-		link.rel = 'stylesheet';
-		link.type = 'text/css';
-		link.href = window.location.search.match( /print-pdf/gi ) ? 'static/reveal/css/print/pdf.css' : 'static/reveal/css/print/paper.css';
-		document.getElementsByTagName( 'head' )[0].appendChild( link );
-	</script>
 </head>
 <body>
 	<div class="box fill">
@@ -35,6 +18,7 @@
 			<span id="username">{{ username }}</span>
 			<button id="chat-button">Chat</button>
 			<button id="challenges-button">Challenges</button>
+			<button id="presentation-button">Presentation</button>
 			<button id="users-button">Users</button>
 			<button id="log-out-button">Log out</button>
 		</div>
@@ -42,10 +26,11 @@
 			<div class="overlay">
 				{% include 'exercises.html' %}
 				{% include 'chat.html' %}
-				<script src="static/socketio/socket.io.js"></script>
-				<script src="static/overlay.js"></script>
 			</div>
-			{% include 'presentation.html' %}
+			<iframe id="content-iframe" class="fill" src="/presentation"></iframe>
+			<!-- {% include 'presentation.html' %} -->
+			<script src="static/socketio/socket.io.js"></script>
+			<script src="static/overlay.js"></script>
 		</div>
 	</div>
 </body>

@@ -66,10 +66,12 @@
 #chat-window > header {
     font-weight: bold;
     padding: .5em;
+    border-bottom: 1px solid #888;
 }
 
 #chat-message-container {
-    overflow-y: scroll;
+    padding-top: .5em;
+    overflow-y: auto;
     justify-content: flex-start;
 }
 
