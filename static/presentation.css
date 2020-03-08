@@ -9,8 +9,20 @@
     flex: 0 0;
     z-index: 99;
     color: #fff;
+    background-color: #191919;
     padding: .4em;
     font-family: sans-serif;
+}
+
+.sidebar .profile-picture {
+    width: 4em;
+    height: 4em;
+    border-radius: 1em;
+    margin: .2em;
+}
+
+#username {
+    margin-bottom: 0.5em;
 }
 
 .sidebar > button {
@@ -20,10 +32,15 @@
     border-radius: .2em;
     border: none;
     background-color: #fff;
+    cursor: pointer;
+}
+
+.sidebar > button.toggled {
+    background-color: #bee4fd;
 }
 
 .sidebar > button:hover {
-    background-color: #bee4fd;
+    color: #999;
 }
 
 .slideshow {
@@ -32,16 +49,21 @@
 }
 
 /* Sidebar */
-.chat-window {
+#chat-window {
     width: 500px;
     height: 200px;
     transition: .2s;
     background-color: #fff;
     color: #000;
     font-family: sans-serif;
+    transition: .4s;
 }
 
-.chat-window > header {
+#chat-window.hidden {
+    transform: translate(-100%, 0);
+}
+
+#chat-window > header {
     font-weight: bold;
     padding: .5em;
 }
@@ -91,7 +113,7 @@
 }   
 
 .mention {
-    color: #f66;
+    color: #ff97da;
 }
 
 .achievement {

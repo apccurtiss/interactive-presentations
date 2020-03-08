@@ -38,7 +38,7 @@ socketio = SocketIO(app)
 limiter = Limiter(app, key_func=get_remote_address)
 
 PHOTO_PATH = 'static/data/profile_photos'
-photos = list(enumerate(os.path.join(PHOTO_PATH, f) for f in os.listdir(PHOTO_PATH)))
+photos = list(os.path.join(PHOTO_PATH, f) for f in os.listdir(PHOTO_PATH))
 
 class User:
     achievements = set()
@@ -120,9 +120,10 @@ def handle_chat_message(message):
 
     censored_message = pf.censor(message)
     emit('chat_message', {
-        'content': censored_message,
         'username': user.username,
-        'time': datetime.now().strftime('%I:%M%p').lower().strip('0')
+        'profile_photo': user.profile_photo,
+        'time': datetime.now().strftime('%I:%M%p').lower().strip('0'),
+        'content': censored_message,
     }, json=True, broadcast=True)
 
 
@@ -175,7 +176,7 @@ def handle_csp():
 @requires_auth
 def index():
     user = Users.get_id(session['uid'])
-    return render_template('index.html', username=user.username)
+    return render_template('index.html', username=user.username, profile_photo=user.profile_photo)
 
 
 @app.route('/signup', methods=['GET'])
@@ -183,18 +184,22 @@ def signup():
     if 'uid' in session and Users.get_id(session['uid']):
         return redirect(url_for('index'))
 
-    return render_template('signup.html', photos=photos)
+    error = session.get('error')
+    if error:
+        del session['error']
+    return render_template('signup.html', photos=enumerate(photos), error=error)
 
 
 @app.route('/signup', methods=['POST'])
 def signup_post():
     username = request.form['username'].lower()
-    logger.info(f'Attempted signup for user: {username}')
+    logger.info(f'Attempted signup for user "{username}"')
 
     try:
-        # if pf.is_profane(username):
-        #     logger.warning(f'Potentially profane username: {username}')
-        #     return ('Username may be profane. Please keep it civil.', 400)
+        if pf.is_profane(username):
+            logger.warning(f'Potentially profane username: {username}')
+            session['error'] = 'Username was detected to be profane'
+            return redirect(url_for('signup'))
 
         uid = uuid.uuid4()
 
@@ -204,14 +209,15 @@ def signup_post():
 
         Users.add(
             uid=uid,
-            username=request.form['username'],
+            username=username,
             profile_photo=photos[int(request.form['photo'])]
         )
         session['uid'] = uid
+
     except Exception as e:
         logger.error(e)
-        return ('Invalid request', 400)
-
+        session['error'] = 'Invalid request'
+        return redirect(url_for('signup'))
 
     logger.info(f'User successfully signed up: {username}')
 

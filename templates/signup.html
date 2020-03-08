@@ -16,7 +16,11 @@
                 <div class="box centered vertical grows">
                     <header class="signup-label">Username</header>
                     <input id="username" type="text" name="username">
-                    <div id="error"></div>
+                    {% if error %}
+                        <div id="error" class="visible">{{ error }}</div>
+                    {% else %}
+                        <div id="error"></div>
+                    {% endif %}
                 </div>
                 <div class="box centered vertical grows">
                     <header class="signup-label">Profile Photo</header>
