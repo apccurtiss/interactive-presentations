@@ -1,5 +1,6 @@
 
 import cgi
+from collections import defaultdict
 from datetime import datetime
 import functools
 import logging
@@ -20,8 +21,9 @@ from flask import (
     url_for)
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from flask_socketio import emit, send, SocketIO
+from flask_socketio import emit, join_room, send, SocketIO
 from profanity_filter import ProfanityFilter
+import uuid
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,14 +40,57 @@ limiter = Limiter(app, key_func=get_remote_address)
 PHOTO_PATH = 'static/data/profile_photos'
 photos = list(enumerate(os.path.join(PHOTO_PATH, f) for f in os.listdir(PHOTO_PATH)))
 
-users = {
-    'admin': '/static/data/profile_photos/admin.jpg'
+class User:
+    achievements = set()
+
+    def __init__(self, uid, username, profile_photo):
+        self.uid = uid
+        self.username = username
+        self.profile_photo = profile_photo
+
+class Users:
+    _users_by_id = {}
+    _users_by_name = {}
+
+    @classmethod
+    def add(cls, uid, username, profile_photo):
+        cls._users_by_id[uid] = cls._users_by_name[username] = User(
+            uid=uid,
+            username=username,
+            profile_photo=profile_photo
+        )
+
+    @classmethod
+    def get_name(cls, username):
+        return cls._users_by_name.get(username)
+
+    @classmethod
+    def get_id(cls, uid):
+        return cls._users_by_id.get(uid)
+
+    @classmethod
+    def get_all(cls):
+        return cls._users_by_id.values()
+
+class Achievement:
+    def __init__(self, desc, howto):
+        self.desc = desc
+        self.howto = howto
+
+achievements = {
+    'client-side/username': 'stole the same username as someone else',
+    'client-side/button': '<did whatever the button does>',
+    'xss/search': 'created a malicious link',
+    # 'xss/bio': 'create a malicious page',
+    'cookies/admin': 'got to the secret admin page',
+    'csrf/admin': '',
 }
+
 
 def requires_auth(f):
     @functools.wraps(f)
     def decorator(*pargs, **kwargs):
-        if session.get('username') not in users:
+        if not Users.get_id(session.get('uid')):
             return redirect(url_for('signup'))
         else:
             return f(*pargs, **kwargs)
@@ -54,14 +99,21 @@ def requires_auth(f):
 
 
 @socketio.on('connect')
+@requires_auth
 def test_connect():
-    emit('my response', {'data': 'Connected'})
+    # Add client to client list
+    flask_id = session.get('uid')
+    socketio_id = request.sid
+    logging.info(f'New socketio connection from {flask_id} (id #{socketio_id})')
+
+    join_room(flask_id)
 
 
 @socketio.on('chat_message')
+@requires_auth
 def handle_chat_message(message):
-    user = session['username']
-    logging.info(f'{user} says: {message}')
+    user = Users.get_id(session['uid'])
+    logging.info(f'{user.username} says: {message}')
 
     if len(message) > 200:
         emit('chat_error', 'Message was too long.')
@@ -69,29 +121,37 @@ def handle_chat_message(message):
     censored_message = pf.censor(message)
     emit('chat_message', {
         'content': censored_message,
-        'username': user,
+        'username': user.username,
         'time': datetime.now().strftime('%I:%M%p').lower().strip('0')
     }, json=True, broadcast=True)
 
 
 @app.route('/api/users')
 def get_all_users():
-    return json.dumps(users.keys())
+    return json.dumps([user.username for user in Users.get_all()])
 
 
-@app.route('/api/user/<user>')
-def get_user(user):
-    return jsonify(users.get(user, None))
+@app.route('/api/user/<username>')
+def get_user(username):
+    user = Users.get_name(username)
+    if not user:
+        return jsonify(None)
+    else:
+        return jsonify({
+            'username': user.username,
+            'profile_photo': user.profile_photo
+        })
+        
 
-
-def handle_achievement(user, achievement):
-    logging.info(f'{user} got achievement: {achievement}')
+def trigger_achievement(uid, achievement):
+    user = Users.get_id(uid)
+    logging.info(f'{user.username} got achievement: {achievement}')  
 
     emit('achievement', {
-        'username': user,
-        'username': user,
+        'username': user.username,
+        'achievement': achievement,
         'time': datetime.now().strftime('%I:%M%p').lower().strip('0')
-    }, json=True, broadcast=True)
+    }, json=True, room=uid)
 
 
 # @app.after_request
@@ -114,12 +174,13 @@ def handle_csp():
 @app.route('/')
 @requires_auth
 def index():
-    return render_template('index.html')
+    user = Users.get_id(session['uid'])
+    return render_template('index.html', username=user.username)
 
 
 @app.route('/signup', methods=['GET'])
 def signup():
-    if session.get('username') in users:
+    if 'uid' in session and Users.get_id(session['uid']):
         return redirect(url_for('index'))
 
     return render_template('signup.html', photos=photos)
@@ -127,22 +188,32 @@ def signup():
 
 @app.route('/signup', methods=['POST'])
 def signup_post():
-    logger.info(f'User joined: {request.form["username"]}')
+    username = request.form['username'].lower()
+    logger.info(f'Attempted signup for user: {username}')
 
     try:
-        username = request.form['username'].lower()
-        if pf.is_profane(username):
-            logger.warning(f'Potentially profane username: {username}')
-            return ('Username may be profane. Please keep it civil.', 400)
-        if username in users:
-            logger.info(f'Username taken: {username}')
-            return ('Username already taken!', 409)
+        # if pf.is_profane(username):
+        #     logger.warning(f'Potentially profane username: {username}')
+        #     return ('Username may be profane. Please keep it civil.', 400)
 
+        uid = uuid.uuid4()
 
-        users[username] = photos[int(request.form['photo'])]
-        session['username'] = username
-    except:
+        # TODO: Make sure duplicate name conflicts are handled correctly.
+        if Users.get_name(username):
+            trigger_achievement(uid, 'client-side/username')
+
+        Users.add(
+            uid=uid,
+            username=request.form['username'],
+            profile_photo=photos[int(request.form['photo'])]
+        )
+        session['uid'] = uid
+    except Exception as e:
+        logger.error(e)
         return ('Invalid request', 400)
+
+
+    logger.info(f'User successfully signed up: {username}')
 
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('has_admin_access', 'false')
@@ -152,13 +223,10 @@ def signup_post():
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    del session['username']
+    del session['uid']
 
     return redirect(url_for('signup'))
 
-
-def handle(tag, message):
-    print(f'Got message: "{message}" with tag: "{tag}"')
 
 if __name__ == "__main__":
     # server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)

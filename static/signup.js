@@ -8,7 +8,11 @@ function displayError(err) {
 let signup = document.getElementById('signup');
 let username_input = document.getElementById('username');
 signup.onsubmit = function() {
-    let username = username_input.value;     
+    let username = username_input.value;
+    if (username.length < 1) {
+        displayError('Username is required');
+        return false;
+    }
     fetch(`/api/user/${username}`)
         .then(function (response) {
             return response.json();

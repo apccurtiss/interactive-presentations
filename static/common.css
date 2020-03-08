@@ -15,9 +15,22 @@
     flex-direction: column;
 }
 
-.box > * {
+.box.centered {
+    align-items: center;
+}
+
+.box > .grows {
     display: flex;
     flex: 1 0;
+}
+
+.box > .fits {
+    display: flex;
+    flex: 0 0;
+}
+
+.box.centered > * {
+    flex: none;
 }
 
 .box template {
@@ -36,6 +49,18 @@
 
 .t2s {
     transition: .2s;
+}
+
+.fl {
+    float: left;
+}
+
+.p1em {
+    padding: 1em;
+}
+
+.absolute {
+    position: absolute;
 }
 
 .faded-out {

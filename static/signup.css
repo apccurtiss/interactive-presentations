@@ -10,10 +10,6 @@ body {
     justify-content: center;
 }
 
-#signup > * {
-    flex: none;
-}
-
 #username {
     border-radius: .2em;
     width: 200px;
@@ -27,6 +23,7 @@ body {
     border-radius: .2em;
     display: none;
     padding: .5em;
+    margin: .5em;
 }
 
 #error.visible {
@@ -39,15 +36,24 @@ body {
 
 .photos {
     flex-wrap: wrap;
-    padding: 0 20% 0 20%;
+    padding: 0 1em 0 1em;
     justify-content: center;
-    overflow-y: auto;
+}
+
+.signup-label {
+    margin: 5em 0 .2em 0;
 }
 
 .signup-button {
     font-size: 1em;
     padding: .2em;
+    margin: 1em;
     border-radius: .2em;
+    border: none;
+}
+
+.signup-button:hover {
+    box-shadow: 0 0 2px 2px #fff;
 }
 
 /* Styling for the radio button images */
@@ -59,9 +65,9 @@ body {
 }
 
 [type=radio] + img {
-    width: 150px;
-    height: 150px;
-    margin: 0.5em;
+    width: 80px;
+    height: 80px;
+    margin: 0.2em;
     cursor: pointer;
 }
 

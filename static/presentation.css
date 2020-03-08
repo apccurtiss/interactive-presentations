@@ -4,8 +4,26 @@
 }
 
 .sidebar {
+    align-items: center;
+    border-right: 1px solid #fff;
     flex: 0 0;
     z-index: 99;
+    color: #fff;
+    padding: .4em;
+    font-family: sans-serif;
+}
+
+.sidebar > button {
+    width: 100%;
+    padding: .4em;
+    margin: .1em;
+    border-radius: .2em;
+    border: none;
+    background-color: #fff;
+}
+
+.sidebar > button:hover {
+    background-color: #bee4fd;
 }
 
 .slideshow {
@@ -38,11 +56,10 @@
     padding: 0 0 1em 0;
 }
 
-.chat-message-picture {
+.profile-picture {
     width: 2em;
     height: 2em;
     border-radius: 1em;
-    margin-right: .5em;
 }
 
 .chat-message-username {
@@ -56,6 +73,10 @@
 
 .chat-message-header {
     margin-bottom: .2em;
+}
+
+.chat-message .profile-picture {
+    margin-right: .5em;
 }
 
 #chat-form {

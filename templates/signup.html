@@ -10,23 +10,32 @@
 	<link rel="stylesheet" href="static/signup.css">
 </head>
 <body class="fill">
-    <form id="signup" class="box vertical fill" action="signup" method="POST">
-        <div id="error"></div>
-        <label for="username">Choose a name</label>
-        <input id="username" type="text" name="username">
-        
-        <label>And a picture</label>
-        <div class="photos box">
-            {% for key, url in photos %}
-            <label>
-                <input type="radio" name="photo" value="{{ key }}" checked>
-                <img src="{{ url }}" class="faded-out t2s" onload="this.classList.remove('faded-out')">
-            </label>
-            {% endfor %}
+    <form id="signup" class="fill" action="signup" method="POST">
+        <div class="box vertical fill">
+            <section class="box fits fill">
+                <div class="box centered vertical grows">
+                    <header class="signup-label">Username</header>
+                    <input id="username" type="text" name="username">
+                    <div id="error"></div>
+                </div>
+                <div class="box centered vertical grows">
+                    <header class="signup-label">Profile Photo</header>
+                    <div class="box photos">
+                        {% for key, url in photos %}
+                        <label>
+                            <input type="radio" name="photo" value="{{ key }}" checked>
+                            <img src="{{ url }}" class="faded-out t2s" onload="this.classList.remove('faded-out')">
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div class="grows">
+            </section>
+            <footer class="box vertical centered fits">
+                <input class="signup-button" type="submit" value="Sign up!">
+            </footer>
         </div>
-
-        <input class="signup-button" type="submit" value="Sign up!">
     </form>
     <script src="static/signup.js"></script>
 </body>
+
 </html>
