@@ -92,5 +92,18 @@
 	link.href = window.location.search.match( /print-pdf/gi ) ? 'static/reveal/css/print/pdf.css' : 'static/reveal/css/print/paper.css';
 	document.getElementsByTagName( 'head' )[0].appendChild( link );
 </script>
+
+<script>
+	// When messaged, change to that slide.
+	window.onmessage = function(e) {
+		[indexh, indexv] = e.data.split('/').map(Number)
+		Reveal.slide(indexh, indexv)
+	};
+	
+	// On slide change, notify parent.
+	Reveal.addEventListener('slidechanged', function(event) {
+		window.top.postMessage(`${event.indexh}/${event.indexv}`, '*');
+	});
+</script>
 </body>
 </html>

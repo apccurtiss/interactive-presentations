@@ -82,7 +82,7 @@ achievements = {
     'client-side/button': '<did whatever the button does>',
     'xss/search': 'created a malicious link',
     # 'xss/bio': 'create a malicious page',
-    'cookies/admin': 'got to the secret admin page',
+    'cookies/admin': 'viewed the admin user\'s page',
     'csrf/admin': '',
 }
 
@@ -244,6 +244,16 @@ def logout():
     del session['uid']
 
     return redirect(url_for('signup'))
+
+presenter_exists = False
+@app.route('/present', methods=['GET'])
+def present():
+    if not presenter_exists:
+        session['presenter'] = True
+
+    if not session.get('presenter'):
+        return redirect(url_for('index'))
+
 
 
 if __name__ == "__main__":

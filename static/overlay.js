@@ -77,15 +77,6 @@ function addNewMessage(author_username, author_photo, time_str, message_content)
     }
 }
 
-function onSlideChange(slide_no) {
-    if (following_presenter) {
-        Reveal.slide(Number(content))
-    }
-    else {
-        slide_no
-    }
-}
-
 let achievement_container = document.querySelector('.achievement');
 function displayAchievement(username, achievement_name, icon_path) {
     achievement_container.getElementById('achievement-image').setAttribute('src', icon_path);
@@ -121,3 +112,27 @@ let presentation_button = document.getElementById('presentation-button');
 presentation_button.onclick = () => {
     content_iframe.setAttribute('src', '/presentation');
 }
+
+// Slide management
+
+let following_presenter = true;
+let presenter_slide = '0/0';
+function followPresenter() {
+    console.log('Reconnected with presenter.')
+    following_presenter = true;
+    onSlideChange(presenter_slide);
+}
+
+function onSlideChange(slide) {
+    presenter_slide = slide;
+    if (following_presenter) {
+        content_iframe.contentWindow.postMessage(slide, '*');
+    }
+}
+
+window.onmessage = function(slide) {
+    if (slide.data != presenter_slide) {
+        console.log('Disassociated from presenter.')
+        following_presenter = false
+    }
+};
