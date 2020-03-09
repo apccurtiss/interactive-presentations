@@ -48,10 +48,6 @@ let chat_message_container = document.getElementById('chat-message-container');
 let scrolled = false;
 chat_message_container.onscroll = () => {
     scrolled = chat_message_container.clientHeight + chat_message_container.scrollTop < chat_message_container.scrollHeight;
-    console.log(scrolled)
-    console.log(chat_message_container)
-    console.log(chat_message_container.clientHeight + chat_message_container.scrollTop)
-    console.log(chat_message_container.scrollHeight)
 }
 function addNewMessage(author_username, author_photo, time_str, message_content) {
     let new_message = chat_message_template.content.cloneNode(true);

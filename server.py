@@ -40,6 +40,11 @@ limiter = Limiter(app, key_func=get_remote_address)
 PHOTO_PATH = 'static/data/profile_photos'
 photos = list(os.path.join(PHOTO_PATH, f) for f in os.listdir(PHOTO_PATH))
 
+PRESENTER_UID = 'presenter'
+PRESENTER_USERNAME = 'presenter'
+PRESENTER_PHOTO = 'static/data/admin.jpg'
+
+
 class User:
     achievements = set()
 
@@ -49,8 +54,16 @@ class User:
         self.profile_photo = profile_photo
 
 class Users:
-    _users_by_id = {}
-    _users_by_name = {}
+    _users_by_id = {
+        PRESENTER_UID: User(
+            uid=PRESENTER_UID,
+            username=PRESENTER_USERNAME,
+            profile_photo=PRESENTER_PHOTO
+        )
+    }
+    _users_by_name = {
+        PRESENTER_USERNAME: _users_by_id[PRESENTER_UID]
+    }
 
     @classmethod
     def add(cls, uid, username, profile_photo):
@@ -117,6 +130,7 @@ def handle_chat_message(message):
 
     if len(message) > 200:
         emit('chat_error', 'Message was too long.')
+        return
 
     censored_message = pf.censor(message)
     emit('chat_message', {
@@ -125,6 +139,14 @@ def handle_chat_message(message):
         'time': datetime.now().strftime('%I:%M%p').lower().strip('0'),
         'content': censored_message,
     }, json=True, broadcast=True)
+
+
+@socketio.on('slide_change')
+def handle_slide_change(slide):
+    if session.get('uid') != PRESENTER_UID:
+        emit('error', 'Only the presenter can change the slide this way.')
+
+    emit('slide_change', slide, broadcast=True, include_self=False)
 
 
 @app.route('/api/users')
@@ -245,14 +267,19 @@ def logout():
 
     return redirect(url_for('signup'))
 
+
 presenter_exists = False
 @app.route('/present', methods=['GET'])
 def present():
+    global presenter_exists
     if not presenter_exists:
-        session['presenter'] = True
+        session['uid'] = PRESENTER_UID
+        presenter_exists = True
 
-    if not session.get('presenter'):
+    if session.get('uid') != PRESENTER_UID:
         return redirect(url_for('index'))
+
+    return render_template('presenter.html')
 
 
 

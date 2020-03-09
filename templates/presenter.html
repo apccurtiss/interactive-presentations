@@ -1,0 +1,26 @@
+<!doctype html>
+<html class="fill">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>PRESENTING: Web Security Basics</title>
+
+	<!-- Overlay -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="static/common.css">
+	<link rel="stylesheet" href="static/presentation.css">
+</head>
+<body class="fill">
+    <div class="slideshow fill">
+        <div class="overlay">
+            {% include 'exercises.html' %}
+            {% include 'chat.html' %}
+        </div>
+        <iframe id="content-iframe" class="fill" src="/presentation"></iframe>
+        <!-- {% include 'presentation.html' %} -->
+        <script src="static/socketio/socket.io.js"></script>
+        <script src="static/presenter.js"></script>
+    </div>
+</body>
+</html>
