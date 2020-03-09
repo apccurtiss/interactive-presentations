@@ -9,7 +9,7 @@ socket.on('chat_message', function(message) {
     if (message.content.indexOf('@presenter') != -1) {
         onPresenterMention(message);
     }
-})
+});
 
 // Slide management
 window.onmessage = function(slide) {

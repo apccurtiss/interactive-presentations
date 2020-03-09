@@ -46,12 +46,13 @@
 .slideshow {
     flex: 1 0;
     z-index: 0;
+    position: relative;
 }
 
 /* Sidebar */
 #chat-window {
-    width: 500px;
-    height: 200px;
+    width: 50%;
+    height: 80%;
     transition: .2s;
     background-color: #fff;
     color: #000;
@@ -115,20 +116,29 @@
 }   
 
 .mention {
-    color: #ff97da;
+    color: #3db2ff;
 }
 
-.achievement {
+#achievement {
     position: absolute;
     top: 0;
-    left: 0;
-    width: 300px;
-    border-radius: 50px;
-    background: grey;
+    right: 0;
+    width: 28em;
+    background: #fff;
     transition: .2s;
+    padding: .5em;
+    border-radius: .7em 0 .7em .7em;
+    font-family: sans-serif;
 }
 
-.achievement.inactive {
+#achievement-image {
+    margin-right: .5em;
+    border-radius: 50%;
+    width: 2em;
+    height: 2em;
+}
+
+#achievement.hidden {
     opacity: 0;
     transform: translate(0, -100%);
 }

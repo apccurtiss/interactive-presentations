@@ -1,0 +1,142 @@
+/* Remove default margins */
+* {
+    margin: 0;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+.box {
+    display: flex;
+    flex: 1 1;
+}
+
+.box.vertical {
+    flex-direction: column;
+}
+
+.box > * {
+    display: flex;
+    flex: 1 0;
+}
+
+.box template {
+    display: initial;
+    flex: none;
+}
+
+.box header, .box footer {
+    flex: 0 1;
+}
+
+.slideshow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.overlay {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 99999;
+}
+
+/* Sidebar */
+.chat-window {
+    width: 500px;
+    height: 600px;
+    transition: .2s;
+    background-color: #fff;
+    color: #000;
+    font-family: sans-serif;
+}
+
+.chat-window > header {
+    font-weight: bold;
+    padding: .5em;
+}
+
+.chat-message-container {
+    overflow-y: scroll;
+    justify-content: flex-start;
+}
+
+.chat-message {
+    flex: 0 0;
+    padding: 0 0 1em 0;
+}
+
+.chat-message-picture {
+    width: 2em;
+    height: 2em;
+    border-radius: 1em;
+    margin-right: .5em;
+    transition: .2s;
+}
+
+.chat-message-picture.hidden {
+    opacity: 0;
+}
+
+.chat-message-username {
+    font-weight: bold;
+}
+
+.chat-message-timestamp {
+    font-style: italic;
+    color: #888;
+}
+
+.chat-message-header {
+    margin-bottom: .2em;
+}
+
+#chat-form {
+    width: 100%;
+}
+
+#chat-input {
+    width: calc(100% - 1em);
+    border-radius: .2em;
+    padding: .5em;
+    margin: .5em;
+}   
+
+.mention {
+    color: #f66;
+}
+
+.sidebar::before {
+    content: "chat";
+    float:left;
+    transform: translate(40px, 0);
+    width: 40px;
+    height: 40px;
+    border-radius: 0 50% 50% 0;
+    padding: 3px;
+    background-color: blue;
+    text-align: center;
+}
+
+.sidebar.closed {
+    /* transform: translate(0, -100); */
+}
+
+.achievement {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 28em;
+    padding: .5em;
+    border-radius: .7em 0 .7em .7em;
+    background: #fff;
+    transition: .2s;
+    font-family: sans-serif;
+}
+
+.achievement.inactive {
+    opacity: 0;
+    transform: translate(0, -100%);
+}

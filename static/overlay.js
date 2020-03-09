@@ -11,6 +11,9 @@ socket.on('chat_message', function(data) {
 socket.on('slide_change', function(new_slide) {
     onSlideChange(new_slide);
 })
+socket.on('achievement', function(data) {
+    onAchievement(data);
+})
 
 let chat_form = document.getElementById('chat-form');
 let chat_input = document.getElementById('chat-input');
@@ -27,7 +30,7 @@ let user_photos = {}
 async function get_user_photo(username) {
     // Cache photos so we don't need to keep fetching them
     if (username in user_photos) {
-        return user_photos;
+        return user_photos[username];
     }
 
     let response = await fetch(`/api/user/${username}`);
@@ -73,22 +76,25 @@ function addNewMessage(author_username, author_photo, time_str, message_content)
     }
 }
 
-let achievement_container = document.querySelector('.achievement');
-function displayAchievement(username, achievement_name, icon_path) {
-    achievement_container.getElementById('achievement-image').setAttribute('src', icon_path);
-    achievement_container.getElementById('achievement-text').textContent = 
-            `@${username} got the achievement: ${achievement_name}!`;
+let achievement_container = document.getElementById('achievement');
+let achievement_image = document.getElementById('achievement-image');
+let achievement_text = document.getElementById('achievement-text');
+let achievement_name = document.getElementById('achievement-name');
+function displayAchievement(image, name, description) {
+    achievement_image.setAttribute('src', image);
+    achievement_name.textContent = name;
+    achievement_text.textContent = description;
     achievement_container.classList.remove('hidden');
 
-    document.settimeout(() => {
+    window.setTimeout(() => {
         achievement_container.classList.add('hidden');
     }, 4000);
 }
 
-function onAchievement(achievement) {
-    let icon_path = './foobar.png';
-    
-    displayAchievement(achievement.username, achievement.name, icon_path, callback);
+function onAchievement(data) {
+    get_user_photo(data.username).then((profile_photo) => {
+        displayAchievement(profile_photo, data.name, data.description);
+    });
 }
 
 let chat_window = document.getElementById('chat-window');

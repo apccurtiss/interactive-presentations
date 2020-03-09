@@ -44,10 +44,10 @@ PRESENTER_UID = 'presenter'
 PRESENTER_USERNAME = 'presenter'
 PRESENTER_PHOTO = 'static/data/admin.jpg'
 
+ANNOUNCED_ACHIEVERS = 3
+
 
 class User:
-    achievements = set()
-
     def __init__(self, uid, username, profile_photo):
         self.uid = uid
         self.username = username
@@ -86,19 +86,40 @@ class Users:
         return cls._users_by_id.values()
 
 class Achievement:
-    def __init__(self, desc, howto):
-        self.desc = desc
-        self.howto = howto
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
+        self.achievers = set()
 
 achievements = {
-    'client-side/username': 'stole the same username as someone else',
-    'client-side/button': '<did whatever the button does>',
-    'xss/search': 'created a malicious link',
-    # 'xss/bio': 'create a malicious page',
-    'cookies/admin': 'viewed the admin user\'s page',
-    'csrf/admin': '',
+    'client-side/username': Achievement('Yoink', 'steal the same username as someone else'),
+    'client-side/button': Achievement('So Much Spaghetti Code', 'view the server source code'),
+    'xss/search': Achievement('Here - Click This', 'create a malicious link'),
+    # 'xss/bio': Achievement('create a malicious page'),
+    'cookies/admin': Achievement('Look At Me; I Am The Admin Now', 'view the admin user\'s page'),
+    # 'csrf/admin': Achievement(''),
 }
 
+
+def trigger_achievement(uid, achievement_id):
+    user = Users.get_id(uid)
+    achievement = achievements[achievement_id]
+    achievement.achievers.add(uid)
+
+    logger.info(f'{user.username} got achievement: {achievement_id}')
+
+    if len(achievement.achievers) <= ANNOUNCED_ACHIEVERS:
+        rooms = [uid, 'presenter']
+    else:
+        rooms = [uid]
+
+    for room in rooms:
+        socketio.emit('achievement', {
+            'username': user.username,
+            'name': achievement.name,
+            'description': achievement.description,
+            'rank': len(achievement.achievers),
+        }, json=True, room=room)
 
 def requires_auth(f):
     @functools.wraps(f)
@@ -117,7 +138,7 @@ def test_connect():
     # Add client to client list
     flask_id = session.get('uid')
     socketio_id = request.sid
-    logging.info(f'New socketio connection from {flask_id} (id #{socketio_id})')
+    logger.info(f'New socketio connection from {flask_id} (id #{socketio_id})')
 
     join_room(flask_id)
 
@@ -126,7 +147,7 @@ def test_connect():
 @requires_auth
 def handle_chat_message(message):
     user = Users.get_id(session['uid'])
-    logging.info(f'{user.username} says: {message}')
+    logger.info(f'{user.username} says: {message}')
 
     if len(message) > 200:
         emit('chat_error', 'Message was too long.')
@@ -164,17 +185,6 @@ def get_user(username):
             'username': user.username,
             'profile_photo': user.profile_photo
         })
-        
-
-def trigger_achievement(uid, achievement):
-    user = Users.get_id(uid)
-    logging.info(f'{user.username} got achievement: {achievement}')  
-
-    emit('achievement', {
-        'username': user.username,
-        'achievement': achievement,
-        'time': datetime.now().strftime('%I:%M%p').lower().strip('0')
-    }, json=True, room=uid)
 
 
 # @app.after_request
