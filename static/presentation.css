@@ -1,6 +1,11 @@
 .overlay {
     position: absolute;
+    pointer-events: none;
     z-index: 9;
+}
+
+.overlay > * {
+    pointer-events: initial;
 }
 
 .sidebar {
@@ -119,6 +124,7 @@
     color: #3db2ff;
 }
 
+/* Achievements */
 #achievement {
     position: absolute;
     top: 0;
@@ -141,4 +147,22 @@
 #achievement.hidden {
     opacity: 0;
     transform: translate(0, -100%);
+}
+
+/* Follow presenter */
+#follow-presenter {
+    position: absolute;
+    bottom: 0;
+    margin: auto;
+    background: #3db2ff;
+    transition: .2s;
+    font-family: sans-serif;
+    color: white;
+    padding: 1em; 
+    border-radius: 0 1em 0 0;
+    cursor: pointer;
+}
+
+#follow-presenter.hidden {
+    opacity: 0;
 }

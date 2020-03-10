@@ -26,8 +26,9 @@
 			<div class="overlay fill">
 				{% include 'chat.html' %}
 				{% include 'achievement.html' %}
+				<div id="follow-presenter" class="hidden">Follow along with presenter</div>
 			</div>
-			<iframe id="content-iframe" class="fill" src="/presentation"></iframe>
+			<iframe id="content-iframe" class="fill" src="/presentation#/{{ slide }}"></iframe>
 			<!-- {% include 'presentation.html' %} -->
 			<script src="static/socketio/socket.io.js"></script>
 			<script src="static/overlay.js"></script>

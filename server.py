@@ -9,7 +9,6 @@ import os
 import random
 import string
 
-
 from flask import (
     Flask,
     jsonify,
@@ -39,6 +38,8 @@ limiter = Limiter(app, key_func=get_remote_address)
 
 PHOTO_PATH = 'static/data/profile_photos'
 photos = list(os.path.join(PHOTO_PATH, f) for f in os.listdir(PHOTO_PATH))
+
+current_slide = '0/0'
 
 PRESENTER_UID = 'presenter'
 PRESENTER_USERNAME = 'presenter'
@@ -92,11 +93,11 @@ class Achievement:
         self.achievers = set()
 
 achievements = {
-    'client-side/username': Achievement('Yoink', 'steal the same username as someone else'),
-    'client-side/button': Achievement('So Much Spaghetti Code', 'view the server source code'),
-    'xss/search': Achievement('Here - Click This', 'create a malicious link'),
-    # 'xss/bio': Achievement('create a malicious page'),
-    'cookies/admin': Achievement('Look At Me; I Am The Admin Now', 'view the admin user\'s page'),
+    'client-side/username': Achievement('Yoink', 'stole the same name as another user!'),
+    'client-side/button': Achievement('So Much Spaghetti Code', 'found out how to view the server source code!'),
+    'xss/search': Achievement('Here - Click This', 'created a malicious XSS link!'),
+    # 'xss/bio': Achievement('created a malicious page!'),
+    'cookies/admin': Achievement('Look At Me; I Am The Admin Now', 'managed to view the admin user\'s page!'),
     # 'csrf/admin': Achievement(''),
 }
 
@@ -104,22 +105,28 @@ achievements = {
 def trigger_achievement(uid, achievement_id):
     user = Users.get_id(uid)
     achievement = achievements[achievement_id]
-    achievement.achievers.add(uid)
 
+    if uid in achievement.achievers:
+        return
+
+    achievement.achievers.add(uid)
     logger.info(f'{user.username} got achievement: {achievement_id}')
 
-    if len(achievement.achievers) <= ANNOUNCED_ACHIEVERS:
-        rooms = [uid, 'presenter']
-    else:
-        rooms = [uid]
+    socketio.emit('achievement', {
+        'username': user.username,
+        'name': achievement.name,
+        'description': f'You {achievement.description}',
+        'rank': len(achievement.achievers),
+    }, json=True, room=uid)
 
-    for room in rooms:
+    # Send the first N winners to the presenter as well, for recognition.
+    if len(achievement.achievers) <= ANNOUNCED_ACHIEVERS:
         socketio.emit('achievement', {
             'username': user.username,
             'name': achievement.name,
-            'description': achievement.description,
+            'description': f'They {achievement.description}',
             'rank': len(achievement.achievers),
-        }, json=True, room=room)
+        }, json=True, room=PRESENTER_UID)
 
 def requires_auth(f):
     @functools.wraps(f)
@@ -164,9 +171,11 @@ def handle_chat_message(message):
 
 @socketio.on('slide_change')
 def handle_slide_change(slide):
+    global current_slide
     if session.get('uid') != PRESENTER_UID:
         emit('error', 'Only the presenter can change the slide this way.')
 
+    current_slide = slide
     emit('slide_change', slide, broadcast=True, include_self=False)
 
 
@@ -208,7 +217,7 @@ def handle_csp():
 @requires_auth
 def index():
     user = Users.get_id(session['uid'])
-    return render_template('index.html', username=user.username, profile_photo=user.profile_photo)
+    return render_template('index.html', username=user.username, profile_photo=user.profile_photo, slide=current_slide)
 
 
 @app.route('/presentation')
@@ -297,5 +306,5 @@ if __name__ == "__main__":
     # server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
 
     # server.serve_forever()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5001)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
     # app.run(debug=True, host='0.0.0.0', port=5000)

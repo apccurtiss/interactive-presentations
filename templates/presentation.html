@@ -125,7 +125,10 @@
 	
 	// On slide change, notify parent.
 	Reveal.addEventListener('slidechanged', function(event) {
-		window.top.postMessage(`${event.indexh}/${event.indexv}`, '*');
+		window.top.postMessage({
+			slide: `${event.indexh}/${event.indexv}`,
+			user_caused: event.previousSlide !== undefined,
+		}, '*');
 	});
 </script>
 </body>

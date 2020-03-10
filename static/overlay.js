@@ -15,17 +15,7 @@ socket.on('achievement', function(data) {
     onAchievement(data);
 })
 
-let chat_form = document.getElementById('chat-form');
-let chat_input = document.getElementById('chat-input');
-chat_form.onsubmit = function() {
-    let message = chat_input.value;
-    if(message.length > 0) {
-        chat_input.value = '';
-        socket.emit('chat_message', message);
-    }
-    return false;
-}
-
+// Utility functions
 let user_photos = {}
 async function get_user_photo(username) {
     // Cache photos so we don't need to keep fetching them
@@ -45,6 +35,17 @@ async function get_user_photo(username) {
     return photo_link;
 }
 
+// Chat handlers
+let chat_form = document.getElementById('chat-form');
+let chat_input = document.getElementById('chat-input');
+chat_form.onsubmit = function() {
+    let message = chat_input.value;
+    if(message.length > 0) {
+        chat_input.value = '';
+        socket.emit('chat_message', message);
+    }
+    return false;
+}
 
 let chat_message_template = document.querySelector('template.chat-message-template');
 let chat_message_container = document.getElementById('chat-message-container');
@@ -76,6 +77,7 @@ function addNewMessage(author_username, author_photo, time_str, message_content)
     }
 }
 
+// Achevement handlers
 let achievement_container = document.getElementById('achievement');
 let achievement_image = document.getElementById('achievement-image');
 let achievement_text = document.getElementById('achievement-text');
@@ -92,36 +94,20 @@ function displayAchievement(image, name, description) {
 }
 
 function onAchievement(data) {
-    get_user_photo(data.username).then((profile_photo) => {
-        displayAchievement(profile_photo, data.name, data.description);
-    });
-}
-
-let chat_window = document.getElementById('chat-window');
-let chat_button = document.getElementById('chat-button');
-chat_button.onclick = () => {
-    chat_window.classList.toggle('hidden');
-    chat_button.classList.toggle('toggled');
-}
-
-let content_iframe = document.getElementById('content-iframe');
-let challenges_button = document.getElementById('challenges-button');
-challenges_button.onclick = (...x) => {
-    content_iframe.setAttribute('src', '/exercises');
-}
-
-let presentation_button = document.getElementById('presentation-button');
-presentation_button.onclick = () => {
-    content_iframe.setAttribute('src', '/presentation');
+    let achievement_image = '/static/data/gold.jpg'
+    displayAchievement(achievement_image, data.name, data.description);
 }
 
 // Slide management
+let follow_presenter = document.getElementById('follow-presenter');
+follow_presenter.onclick = followPresenter;
 
 let following_presenter = true;
 let presenter_slide = '0/0';
 function followPresenter() {
-    console.log('Reconnected with presenter.')
+    console.log('Reconnected with presenter.');
     following_presenter = true;
+    follow_presenter.classList.add('hidden');
     onSlideChange(presenter_slide);
 }
 
@@ -132,9 +118,33 @@ function onSlideChange(slide) {
     }
 }
 
-window.onmessage = function(slide) {
-    if (slide.data != presenter_slide) {
-        console.log('Disassociated from presenter.')
-        following_presenter = false
+window.onmessage = function(event) {
+    if (!event.data.user_caused) {
+        presenter_slide = event.data.slide;
+        return;
+    }
+    if (event.data.slide != presenter_slide) {
+        console.log('Disassociated from presenter.');
+        follow_presenter.classList.remove('hidden');
+        following_presenter = false;
     }
 };
+
+// Sidebar buttons
+let chat_window = document.getElementById('chat-window');
+let chat_button = document.getElementById('chat-button');
+chat_button.onclick = () => {
+    chat_window.classList.toggle('hidden');
+    chat_button.classList.toggle('toggled');
+}
+
+let content_iframe = document.getElementById('content-iframe');
+let challenges_button = document.getElementById('challenges-button');
+challenges_button.onclick = () => {
+    content_iframe.setAttribute('src', '/exercises');
+}
+
+let presentation_button = document.getElementById('presentation-button');
+presentation_button.onclick = () => {
+    content_iframe.setAttribute('src', '/presentation');
+}
