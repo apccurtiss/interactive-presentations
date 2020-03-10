@@ -17,7 +17,12 @@ search_form.onsubmit = () => {
             }
         }, 0);
     
-    result_message.innerHTML = `Your search for "${search}" found ${results} result(s).`
+    if (search.length > 0) {
+        result_message.innerHTML = `Your search for "${search}" found ${results} result(s).`;
+    }
+    else {
+        result_message.innerHTML = '';
+    }
 
     return false;
 }

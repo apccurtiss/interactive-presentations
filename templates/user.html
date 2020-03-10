@@ -1,0 +1,25 @@
+<!doctype html>
+<html class="fill">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>Web Security Basics</title>
+
+	<!-- Overlay -->
+	<link rel="stylesheet" href="/static/common.css">
+	<link rel="stylesheet" href="/static/user.css">
+</head>
+<body class="fill">
+    <div class="user-profile">
+        <div class="profile-header box">
+            <img class="profile-picture" src="/{{ profile_photo }}"></img>
+            <div class="profile-username">{{ username }}</div>
+        </div>
+        <div class="profile-bio">{{ biography }}</div>
+    </div>
+    <div class="back-button box">
+        <a href="/users"><button>Back to user search</button></a>
+    </div>
+</body>
+</html>

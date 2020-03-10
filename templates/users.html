@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html class="fill">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,18 +10,26 @@
 	<link rel="stylesheet" href="static/common.css">
 	<link rel="stylesheet" href="static/users.css">
 </head>
-<body>
-	<form id="search-form" action="#">
-		<input type=text id="search-input" name="search" placeholder="Search users"></input>
-	</form>
-	<div id="result-message"></div>
-	<div class="profile-list box">
-		{% for user in users %}
-		<div class="user-profile">
-			<img class="profile-picture" src="{{ user.profile_photo }}"></img>
-			<div class="profile-username">{{ user.username }}</div>
+<body class="fill">
+	<div class="box vertical user-container fill">
+		<form id="search-form" class="fits" action="#">
+			<input type=text id="search-input" class="fill" name="search" placeholder="Search users"></input>
+		</form>
+		<div id="result-message" class="fits">
+			{% if error %}
+				<div class="error">Error: {{ error }}</div>
+			{% endif %}
 		</div>
-		{% endfor %}
+		<div class="profile-list box grows">
+			{% for user in users %}
+			<a href="/users/{{ user.username }}">
+				<div class="user-profile">
+					<img class="profile-picture" src="{{ user.profile_photo }}"></img>
+					<div class="profile-username">{{ user.username }}</div>
+				</div>
+			</a>
+			{% endfor %}
+		</div>
 	</div>
 	<script src="static/users.js"></script>
 </body>

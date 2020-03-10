@@ -37,7 +37,7 @@ socketio = SocketIO(app)
 limiter = Limiter(app, key_func=get_remote_address)
 
 PHOTO_PATH = 'static/data/profile_photos'
-photos = list(os.path.join(PHOTO_PATH, f) for f in os.listdir(PHOTO_PATH))
+photos = sorted(list(os.path.join(PHOTO_PATH, f) for f in os.listdir(PHOTO_PATH)))
 
 current_slide = '0/0'
 
@@ -104,9 +104,10 @@ achievements = {
     'client-side/username': Achievement('Yoink', 'stole the same name as another user!'),
     'client-side/button': Achievement('So Much Spaghetti Code', 'found out how to view the server source code!'),
     'xss/search': Achievement('Here - Click This', 'created a malicious XSS link!'),
-    # 'xss/bio': Achievement('created a malicious page!'),
+    # 'xss/bio': Achievement('', 'injected XSS into their profile page!'),
     'cookies/admin': Achievement('Look At Me; I Am The Admin Now', 'managed to view the admin user\'s page!'),
-    # 'csrf/admin': Achievement(''),
+    # 'csrf/admin': Achievement('', ''),
+    'secret/endpoint': Achievement('Gotta\' Catch Them All!', 'found the secret hidden challenge!'),
 }
 
 
@@ -204,6 +205,25 @@ def get_user(username):
         })
 
 
+@app.route('/disabled-button')
+@requires_auth
+def source_code():
+    user = Users.get_id(session.get('uid'))
+    trigger_achievement(user.uid, 'client-side/button')
+
+    return render_template('presentation.html')
+
+
+@app.route('/suuuuper-secret-hidden-page-that-nobody-knows-about')
+@requires_auth
+def secret_achievement():
+    user = Users.get_id(session.get('uid'))
+    if user:
+        trigger_achievement(user.uid, 'secret/endpoint')
+
+    return render_template('presentation.html')
+
+
 @app.route('/csp-report', methods=['POST'])
 def handle_csp():
     user = Users.get_id(session.get('uid'))
@@ -239,13 +259,41 @@ def exercises():
 @app.route('/users')
 @requires_auth
 def users():
-    response = make_response(render_template('users.html', users=Users.get_all()))
+    error = session.get('error')
+    if error is not None:
+        del session['error']
+
+    response = make_response(render_template('users.html', error=error, users=Users.get_all()))
     response.headers['Content-Security-Policy-Report-Only'] = (
         'default-src \'self\';'
         'script-src \'none\';'
         'report-uri /csp-report;'
     )
     return response
+
+
+@app.route('/users/<username>')
+@requires_auth
+def user_profile(username):
+    user = Users.get_name(username)
+    if not user:
+        session['error'] = 'This user does not exist.'
+        return redirect(url_for('users'))
+
+    bio = r'I was going to add support for user bios, but ran out of time ¯\_(ツ)_/¯'
+
+    if username == PRESENTER_USERNAME:
+        if request.cookies.get('has_admin_access') != 'true':
+            session['error'] = 'You need admin access to view this profile.'
+            return redirect(url_for('users'))
+        else:
+            trigger_achievement(session.get('uid'), 'cookies/admin')
+            bio = 'Great job!'
+
+    return render_template('user.html',
+        username=user.username,
+        profile_photo=user.profile_photo,
+        biography=bio)
 
 
 @app.route('/signup', methods=['GET'])
@@ -293,7 +341,7 @@ def signup_post():
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('has_admin_access', 'false')
 
-    return redirect(url_for('index'))
+    return resp
 
 
 @app.route('/logout')

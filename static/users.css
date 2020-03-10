@@ -5,12 +5,25 @@ body {
     font-size: 1.5em;
 }
 
-.profile-list {
-
+#search-input {
+    border-radius: .2em;
+    font-size: 1em;
+    padding: .5em;
 }
 
-.profile-username {
+#result-message {
+    height: 4em;
+    padding: .5em 0 1em 0;
+    flex: none;
+}
 
+.user-container {
+    padding: 5em;
+}
+
+.profile-list {
+    flex-wrap: wrap;
+    align-content: flex-start;
 }
 
 .profile-picture {
@@ -20,9 +33,21 @@ body {
 }
 
 .user-profile {
-
+    margin: .5em;
+    padding: .5em;
+    border-radius: .2em;
+    border: 1px solid #fff;
+    width: 8em;
+    height: 4.5em;
 }
 
 .user-profile.hidden {
     display: none;
+}
+
+.error {
+    background-color: #FCC;
+    color: black;
+    padding: .5em;
+    border-radius: .2em;
 }

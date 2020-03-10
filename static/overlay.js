@@ -142,6 +142,7 @@ let content_iframe = document.getElementById('content-iframe');
 let exercises_button = document.getElementById('exercises-button');
 let presentation_button = document.getElementById('presentation-button');
 let users_button = document.getElementById('users-button');
+let unknown_button = document.getElementById('unknown-button');
 presentation_button.onclick = () => {
     content_iframe.setAttribute('src', `/presentation#/${presenter_slide}`);
     presentation_button.classList.add('toggled');
@@ -163,4 +164,8 @@ users_button.onclick = () => {
     presentation_button.classList.remove('toggled');
     exercises_button.classList.remove('toggled');
     users_button.classList.add('toggled');
+}
+
+unknown_button.onclick = () => {
+    content_iframe.setAttribute('src', '/disabled-button');
 }

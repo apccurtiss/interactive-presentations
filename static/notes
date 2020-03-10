@@ -1,0 +1,13 @@
+Covered:
+    - HTML, CSS, JS
+    - Cookies
+    - Don't trust client-side validation
+    - Client-side password check demo
+
+Need to cover:
+    - 
+
+Should reenforce:
+    - Servers, users, databases - they're all just computers running programs
+    - Server tech is unavailable to client
+    - Session variables vs cookies: what's the difference (server-side is unavailable to user)
