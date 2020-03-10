@@ -16,11 +16,12 @@
 		<div class="sidebar box vertical">
 			<img class="profile-picture" src="{{ profile_photo }}"></img>
 			<span id="username">{{ username }}</span>
-			<button id="chat-button">Chat</button>
-			<button id="challenges-button">Challenges</button>
-			<button id="presentation-button">Presentation</button>
+			<button id="presentation-button" class="toggled">Presentation</button>
+			<button id="exercises-button">Exercises</button>
 			<button id="users-button">Users</button>
-			<button id="log-out-button">Log out</button>
+			<hr/>
+			<button id="chat-button">Chat</button>
+			<button id="logout-button" onclick="location.href='/logout';">Log out</button>
 		</div>
 		<div class="slideshow">
 			<div class="overlay fill">

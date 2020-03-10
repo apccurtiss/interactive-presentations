@@ -75,6 +75,12 @@ class Users:
         )
 
     @classmethod
+    def remove_by_id(cls, uid):
+        user = cls.get_id(uid)
+        del cls._users_by_name[user.username]
+        del cls._users_by_id[user.uid]
+
+    @classmethod
     def get_name(cls, username):
         return cls._users_by_name.get(username)
 
@@ -199,6 +205,7 @@ def get_user(username):
 # @app.after_request
 def apply_csp(response):
     response.headers['Content-Security-Policy-Report-Only'] = (
+        # 'default-src *;'
         'default-src \'none\';'
         'style-src cdn.example.com;'
         'report-uri /csp'
@@ -209,6 +216,7 @@ def apply_csp(response):
 @app.route('/csp', methods=['POST'])
 def handle_csp():
     print('CSP report:')
+    print('Session token:', session.get('uid'))
     print(request.data)
     return 'ok'
 
@@ -230,6 +238,12 @@ def presentation():
 @requires_auth
 def exercises():
     return render_template('exercises.html')
+
+
+@app.route('/users')
+@requires_auth
+def users():
+    return render_template('users.html')
 
 
 @app.route('/signup', methods=['GET'])
@@ -280,8 +294,9 @@ def signup_post():
     return redirect(url_for('index'))
 
 
-@app.route('/logout', methods=['POST'])
+@app.route('/logout')
 def logout():
+    Users.remove_by_id(session['uid'])
     del session['uid']
 
     return redirect(url_for('signup'))
@@ -306,5 +321,5 @@ if __name__ == "__main__":
     # server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
 
     # server.serve_forever()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5002)
     # app.run(debug=True, host='0.0.0.0', port=5000)

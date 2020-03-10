@@ -139,12 +139,28 @@ chat_button.onclick = () => {
 }
 
 let content_iframe = document.getElementById('content-iframe');
-let challenges_button = document.getElementById('challenges-button');
-challenges_button.onclick = () => {
-    content_iframe.setAttribute('src', '/exercises');
+let exercises_button = document.getElementById('exercises-button');
+let presentation_button = document.getElementById('presentation-button');
+let users_button = document.getElementById('users-button');
+presentation_button.onclick = () => {
+    content_iframe.setAttribute('src', `/presentation#/${presenter_slide}`);
+    presentation_button.classList.add('toggled');
+    exercises_button.classList.remove('toggled');
+    users_button.classList.remove('toggled');
 }
 
-let presentation_button = document.getElementById('presentation-button');
-presentation_button.onclick = () => {
-    content_iframe.setAttribute('src', '/presentation');
+exercises_button.onclick = () => {
+    content_iframe.setAttribute('src', '/exercises');
+    follow_presenter.classList.add('hidden');
+    presentation_button.classList.remove('toggled');
+    exercises_button.classList.add('toggled');
+    users_button.classList.remove('toggled');
+}
+
+users_button.onclick = () => {
+    content_iframe.setAttribute('src', '/users');
+    follow_presenter.classList.add('hidden');
+    presentation_button.classList.remove('toggled');
+    exercises_button.classList.remove('toggled');
+    users_button.classList.add('toggled');
 }

@@ -30,7 +30,7 @@
     margin-bottom: 0.5em;
 }
 
-.sidebar > button {
+.sidebar button {
     width: 100%;
     padding: .4em;
     margin: .1em;
@@ -40,11 +40,11 @@
     cursor: pointer;
 }
 
-.sidebar > button.toggled {
+.sidebar button.toggled {
     background-color: #bee4fd;
 }
 
-.sidebar > button:hover {
+.sidebar button:hover {
     color: #999;
 }
 

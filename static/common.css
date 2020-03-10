@@ -6,6 +6,10 @@
     -webkit-box-sizing: border-box;
 }
 
+body {
+    background-color: #fff;
+}
+
 .box {
     display: flex;
     flex: 1 1;
@@ -65,4 +69,10 @@
 
 .faded-out {
     opacity: 0;
+}
+
+hr {
+    color: #fff;
+    width: 100%;
+    margin: 1em 0;
 }
