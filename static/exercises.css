@@ -1,4 +1,6 @@
-.exercises_container {
-    color: white;
-    padding: 5em;
+body {
+    background-color: #000;
+    color: #FFF;
+    font-family: sans-serif;
+    font-size: 1.5em;
 }

@@ -8,8 +8,21 @@
 
 	<!-- Overlay -->
 	<link rel="stylesheet" href="static/common.css">
-	<link rel="stylesheet" href="static/exercises.css">
+	<link rel="stylesheet" href="static/users.css">
 </head>
 <body>
+	<form id="search-form" action="#">
+		<input type=text id="search-input" name="search" placeholder="Search users"></input>
+	</form>
+	<div id="result-message"></div>
+	<div class="profile-list box">
+		{% for user in users %}
+		<div class="user-profile">
+			<img class="profile-picture" src="{{ user.profile_photo }}"></img>
+			<div class="profile-username">{{ user.username }}</div>
+		</div>
+		{% endfor %}
+	</div>
+	<script src="static/users.js"></script>
 </body>
 </html>

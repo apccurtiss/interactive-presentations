@@ -53,6 +53,7 @@ class User:
         self.uid = uid
         self.username = username
         self.profile_photo = profile_photo
+        self.achievements = set()
 
 class Users:
     _users_by_id = {
@@ -77,8 +78,9 @@ class Users:
     @classmethod
     def remove_by_id(cls, uid):
         user = cls.get_id(uid)
-        del cls._users_by_name[user.username]
-        del cls._users_by_id[user.uid]
+        if user:
+            del cls._users_by_name[user.username]
+            del cls._users_by_id[user.uid]
 
     @classmethod
     def get_name(cls, username):
@@ -202,22 +204,15 @@ def get_user(username):
         })
 
 
-# @app.after_request
-def apply_csp(response):
-    response.headers['Content-Security-Policy-Report-Only'] = (
-        # 'default-src *;'
-        'default-src \'none\';'
-        'style-src cdn.example.com;'
-        'report-uri /csp'
-    )
-    return response
-
-
-@app.route('/csp', methods=['POST'])
+@app.route('/csp-report', methods=['POST'])
 def handle_csp():
-    print('CSP report:')
-    print('Session token:', session.get('uid'))
-    print(request.data)
+    user = Users.get_id(session.get('uid'))
+    if user:
+        trigger_achievement(user.uid, 'xss/search')
+
+    logger.info('Got CSP report')
+    logger.info(request.data)
+
     return 'ok'
 
 
@@ -237,13 +232,20 @@ def presentation():
 @app.route('/exercises')
 @requires_auth
 def exercises():
-    return render_template('exercises.html')
+    user = Users.get_id(session['uid'])
+    return render_template('exercises.html', achievements=achievements, completed=user.achievements)
 
 
 @app.route('/users')
 @requires_auth
 def users():
-    return render_template('users.html')
+    response = make_response(render_template('users.html', users=Users.get_all()))
+    response.headers['Content-Security-Policy-Report-Only'] = (
+        'default-src \'self\';'
+        'script-src \'none\';'
+        'report-uri /csp-report;'
+    )
+    return response
 
 
 @app.route('/signup', methods=['GET'])
@@ -314,7 +316,6 @@ def present():
         return redirect(url_for('index'))
 
     return render_template('presenter.html')
-
 
 
 if __name__ == "__main__":

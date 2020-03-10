@@ -24,16 +24,18 @@ window.onmessage = function(slide) {
 let achievement_container = document.getElementById('achievement');
 let achievement_image = document.getElementById('achievement-image');
 let achievement_text = document.getElementById('achievement-text');
+let achievement_username = document.getElementById('achievement-username');
 let achievement_name = document.getElementById('achievement-name');
-function displayAchievement(image, name, description) {
+function displayAchievement(image, username, name, description) {
     achievement_image.setAttribute('src', image);
     achievement_name.textContent = name;
+    achievement_username.textContent = username;
     achievement_text.textContent = description;
     achievement_container.classList.remove('hidden');
 
     window.setTimeout(() => {
         achievement_container.classList.add('hidden');
-    }, 4000);
+    }, 6000);
 }
 
 function onAchievement(data) {
@@ -47,5 +49,5 @@ function onAchievement(data) {
     else {
         achievement_image = '/static/data/bronze.jpg';
     }
-    displayAchievement(achievement_image, data.name, data.description);
+    displayAchievement(achievement_image, data.username, data.name, data.description);
 }

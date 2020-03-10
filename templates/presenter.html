@@ -13,8 +13,16 @@
 </head>
 <body class="fill">
     <div class="slideshow fill">
-        <div class="overlay">
-            {% include 'achievement.html' %}
+        <div class="overlay fill">
+            <div id="achievement" class="box hidden">
+                <div>
+                    <img id="achievement-image"></img>
+                </div>
+                <div>
+                    @<span id="achievement-username"></span> completed: <span id="achievement-name"></span>
+                    <div id="achievement-text"></div>
+                </div>
+            </div>
             {% include 'chat.html' %}
         </div>
         <iframe id="content-iframe" class="fill" src="/presentation"></iframe>
