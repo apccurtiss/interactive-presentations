@@ -1,0 +1,30 @@
+body {
+    background-color: #000;
+    color: #fff;
+}
+
+.challenges-container {
+    padding: 5em;
+}
+
+.challenge-container {
+    padding: 1em;
+}
+
+.challenge-container.completed {
+    text-decoration: line-through;
+    color: #aaa;
+}
+
+.challenge-name {
+    font-weight: bold;
+}
+
+.challenge-description {
+
+}
+
+.challenge-hint {
+    font-style: italic;
+    color: #aaa;
+}

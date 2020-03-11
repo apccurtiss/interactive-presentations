@@ -32,6 +32,7 @@
 
 .sidebar button {
     width: 100%;
+    font-size: 1em;
     padding: .4em;
     margin: .1em;
     border-radius: .2em;
@@ -56,7 +57,7 @@
 
 /* Sidebar */
 #chat-window {
-    width: 50%;
+    width: 30em;
     height: 80%;
     transition: .2s;
     background-color: #fff;

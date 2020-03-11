@@ -13,7 +13,7 @@ signup.onsubmit = function() {
         displayError('Username is required');
         return false;
     }
-    fetch(`/api/user/${username}`)
+    fetch(`/username_taken/${username}`)
         .then(function (response) {
             return response.json();
         })

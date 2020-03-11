@@ -15,26 +15,6 @@ socket.on('achievement', function(data) {
     onAchievement(data);
 })
 
-// Utility functions
-let user_photos = {}
-async function get_user_photo(username) {
-    // Cache photos so we don't need to keep fetching them
-    if (username in user_photos) {
-        return user_photos[username];
-    }
-
-    let response = await fetch(`/api/user/${username}`);
-    let user_data = await response.json();
-    let photo_link = '/static/data/profile_photos/default.jpeg';
-
-    if (user_data != null) {
-        photo_link = user_data.profile_photo;
-    }
-
-    user_photos[username] = photo_link;
-    return photo_link;
-}
-
 // Chat handlers
 let chat_form = document.getElementById('chat-form');
 let chat_input = document.getElementById('chat-input');
@@ -57,7 +37,6 @@ function addNewMessage(author_username, author_photo, time_str, message_content)
     let new_message = chat_message_template.content.cloneNode(true);
     
     let new_picture = new_message.getElementById('profile-picture');
-    // new_picture.setAttribute('src', `static/data/profile_photos/${author_username}`);
     new_picture.setAttribute('src', author_photo);
     new_picture.setAttribute('alt', `Profile picture for user ${author_username}`);
     new_message.getElementById('profile-link').setAttribute('href', `./users/${author_username}`);
@@ -70,7 +49,6 @@ function addNewMessage(author_username, author_photo, time_str, message_content)
     new_body.innerHTML = new_body.innerHTML.replace(
         /@\w+/g, (s) => `<span class="mention">${s}</span>`);
     
-    // We're not really expecting multiple chat containers, but who knows?
     chat_message_container.appendChild(new_message);
     if(!scrolled) {
         chat_message_container.scrollTop = chat_message_container.scrollHeight;
@@ -138,23 +116,24 @@ chat_button.onclick = () => {
     chat_button.classList.toggle('toggled');
 }
 
+// Everything is in an iframe to keep the dashboard on top of it all.
 let content_iframe = document.getElementById('content-iframe');
-let exercises_button = document.getElementById('exercises-button');
+let challenges_button = document.getElementById('challenges-button');
 let presentation_button = document.getElementById('presentation-button');
 let users_button = document.getElementById('users-button');
-let unknown_button = document.getElementById('unknown-button');
+let source_button = document.getElementById('source-button');
 presentation_button.onclick = () => {
     content_iframe.setAttribute('src', `/presentation#/${presenter_slide}`);
     presentation_button.classList.add('toggled');
-    exercises_button.classList.remove('toggled');
+    challenges_button.classList.remove('toggled');
     users_button.classList.remove('toggled');
 }
 
-exercises_button.onclick = () => {
-    content_iframe.setAttribute('src', '/exercises');
+challenges_button.onclick = () => {
+    content_iframe.setAttribute('src', '/challenges');
     follow_presenter.classList.add('hidden');
     presentation_button.classList.remove('toggled');
-    exercises_button.classList.add('toggled');
+    challenges_button.classList.add('toggled');
     users_button.classList.remove('toggled');
 }
 
@@ -162,10 +141,10 @@ users_button.onclick = () => {
     content_iframe.setAttribute('src', '/users');
     follow_presenter.classList.add('hidden');
     presentation_button.classList.remove('toggled');
-    exercises_button.classList.remove('toggled');
+    challenges_button.classList.remove('toggled');
     users_button.classList.add('toggled');
 }
 
-unknown_button.onclick = () => {
-    content_iframe.setAttribute('src', '/disabled-button');
+source_button.onclick = () => {
+    content_iframe.setAttribute('src', '/source');
 }

@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>Web Security Basics</title>
+
+	<!-- Overlay -->
+	<link rel="stylesheet" href="static/common.css">
+	<link rel="stylesheet" href="static/challenges.css">
+</head>
+<body>
+	<section class="challenges-container">
+        {% for id, challenge in challenges.items() %}
+            {% if id in completed %}
+                <div class="challenge-container completed">
+            {% else %}
+                <div class="challenge-container">
+            {% endif %}
+                <div class="challenge-name">{{ challenge.name }}</div>
+                <div class="challenge-description">{{ challenge.description }}</div>
+                <div class="challenge-hint">{{ challenge.hint }}</div>
+            </div>
+        {% endfor %}
+    </section>
+</body>
+</html>

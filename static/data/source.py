@@ -24,10 +24,10 @@ from flask_socketio import emit, join_room, send, SocketIO
 from profanity_filter import ProfanityFilter
 import uuid
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-# logging.getLogger('werkzeug').setLevel(logging.WARNING)
-# logging.getLogger('engineio').setLevel(logging.WARNING)
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
+logging.getLogger('engineio').setLevel(logging.WARNING)
 
 pf = ProfanityFilter(languages=['en'])
 
@@ -55,7 +55,6 @@ class User:
         self.uid = uid
         self.username = username
         self.profile_photo = profile_photo
-        self.challenges = set()
 
 class Users:
     _users_by_id = {
@@ -71,13 +70,18 @@ class Users:
 
     @classmethod
     def add(cls, uid, username, profile_photo):
-        if username in cls._users_by_name:
-            new_user = cls._users_by_name[username]
-            new_user.uid = uid
-            new_user.profile_photo = profile_photo
-        else:
-            new_user = User(uid=uid, username=username, profile_photo=profile_photo)
-        cls._users_by_id[uid] = cls._users_by_name[username] = new_user
+        cls._users_by_id[uid] = cls._users_by_name[username] = User(
+            uid=uid,
+            username=username,
+            profile_photo=profile_photo
+        )
+
+    @classmethod
+    def remove_by_id(cls, uid):
+        user = cls.get_id(uid)
+        if user:
+            del cls._users_by_name[user.username]
+            del cls._users_by_id[user.uid]
 
     @classmethod
     def get_name(cls, username):
@@ -109,7 +113,7 @@ challenges = {
     'client-side/username': Challenge(
         name='Yoink!',
         description='Sign up with a username that is already in use.',
-        hint='(Your original account will get the credit)',
+        hint='No side like the client side!',
         oncomplete='stole the same name as another user!'
     ),
     'xss/search': Challenge(
@@ -141,7 +145,6 @@ def trigger_achievement(uid, achievement_id):
         return
 
     achievement.achievers.add(uid)
-    user.challenges.add(achievement_id)
     logger.info(f'{user.username} got achievement: {achievement_id}')
 
     socketio.emit('achievement', {
@@ -156,7 +159,7 @@ def trigger_achievement(uid, achievement_id):
         socketio.emit('achievement', {
             'username': user.username,
             'name': achievement.name,
-            'description': f'They {achievement.oncomplete}',
+            'description': f'They {achievement.description}',
             'rank': len(achievement.achievers),
         }, json=True, room=PRESENTER_UID)
 
@@ -164,7 +167,7 @@ def trigger_achievement(uid, achievement_id):
 def requires_auth(f):
     @functools.wraps(f)
     def decorator(*pargs, **kwargs):
-        if session.get('logged_out') or not Users.get_id(session.get('uid')):
+        if not Users.get_id(session.get('uid')):
             return redirect(url_for('signup'))
         else:
             return f(*pargs, **kwargs)
@@ -203,8 +206,7 @@ def handle_chat_message(message):
 
 
 @socketio.on('slide_change')
-def handle_slide_change(data):
-    slide = data['slide']
+def handle_slide_change(slide):
     global current_slide
     if session.get('uid') != PRESENTER_UID:
         emit('error', 'Only the presenter can change the slide this way.')
@@ -213,10 +215,10 @@ def handle_slide_change(data):
     emit('slide_change', slide, broadcast=True, include_self=False)
 
 
-@app.route('/username_taken/<username>')
+@app.route('/api/user/<username>')
 def get_user(username):
     user = Users.get_name(username)
-    if not user or user.uid == session.get('uid'):
+    if not user:
         return jsonify(None)
     else:
         return jsonify({
@@ -286,7 +288,7 @@ def users():
     response = make_response(render_template('users.html', error=error, users=Users.get_all()))
     response.headers['Content-Security-Policy-Report-Only'] = (
         'default-src \'self\';'
-        'script-src \'/static/users.js\';'
+        'script-src \'none\';'
         'report-uri /csp-report;'
     )
     return response
@@ -318,7 +320,7 @@ def user_profile(username):
 
 @app.route('/signup', methods=['GET'])
 def signup():
-    if 'uid' in session and Users.get_id(session['uid']) and not session.get('logged_out'):
+    if 'uid' in session and Users.get_id(session['uid']):
         return redirect(url_for('index'))
 
     error = session.get('error')
@@ -338,11 +340,10 @@ def signup_post():
             session['error'] = 'Username was detected to be profane'
             return redirect(url_for('signup'))
 
-        uid = session.get('uid') or uuid.uuid4()
+        uid = uuid.uuid4()
 
         # TODO: Make sure duplicate name conflicts are handled correctly.
-        existing_user = Users.get_name(username)
-        if existing_user and existing_user.uid != uid:
+        if Users.get_name(username):
             trigger_achievement(uid, 'client-side/username')
 
         Users.add(
@@ -361,15 +362,14 @@ def signup_post():
 
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('has_admin_access', 'false')
-    if 'logged_out' in session:
-        del session['logged_out']
 
     return resp
 
 
 @app.route('/logout')
 def logout():
-    session['logged_out'] = True
+    Users.remove_by_id(session['uid'])
+    del session['uid']
 
     return redirect(url_for('signup'))
 
