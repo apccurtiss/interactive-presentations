@@ -348,7 +348,7 @@ def signup_post():
         Users.add(
             uid=uid,
             username=username,
-            profile_photo=photos[int(request.form['photo'])]
+            profile_photo=photos[int(request.form.get('photo', 0))]
         )
         session['uid'] = uid
 
@@ -392,5 +392,5 @@ if __name__ == "__main__":
     # server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
 
     # server.serve_forever()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5002)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5003)
     # app.run(debug=True, host='0.0.0.0', port=5000)

@@ -27,7 +27,7 @@
                     <div class="box photos">
                         {% for key, url in photos %}
                         <label>
-                            <input type="radio" name="photo" value="{{ key }}" checked>
+                            <input type="radio" name="photo" value="{{ key }}">
                             <img src="{{ url }}" class="faded-out t2s" onload="this.classList.remove('faded-out')">
                         </label>
                         {% endfor %}
