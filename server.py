@@ -231,7 +231,7 @@ def source_code():
     user = Users.get_id(session.get('uid'))
     trigger_achievement(user.uid, 'client-side/button')
 
-    return redirect('/static/data/source.py')
+    return render_template('source.html')
 
 
 @app.route('/suuuuper-secret-hidden-page-that-nobody-knows-about')
@@ -241,7 +241,7 @@ def secret_achievement():
     if user:
         trigger_achievement(user.uid, 'secret/endpoint')
 
-    return render_template('presentation.html')
+    return render_template('secret.html')
 
 
 @app.route('/csp-report', methods=['POST'])

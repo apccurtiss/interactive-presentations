@@ -1,4 +1,4 @@
-
+<pre style="color: white">
 import cgi
 from collections import defaultdict
 from datetime import datetime
@@ -32,7 +32,6 @@ logging.getLogger('engineio').setLevel(logging.WARNING)
 pf = ProfanityFilter(languages=['en'])
 
 app = Flask(__name__)
-app.secret_key = 'My super secret key!'
 app._static_folder = 'static'
 socketio = SocketIO(app)
 
@@ -119,7 +118,7 @@ challenges = {
     'xss/search': Challenge(
         name='Here - Click This',
         description='Use XSS to run your own JavaScript on this page.',
-        hint='Some browsers block <script> as a safety measure, but other HTML tags can run JavaScript...',
+        hint='Some browsers block script tags as a safety measure, but other HTML tags can run JavaScript...',
         oncomplete='created a malicious XSS link!'
     ),
     'cookies/admin': Challenge(
@@ -215,7 +214,7 @@ def handle_slide_change(slide):
     emit('slide_change', slide, broadcast=True, include_self=False)
 
 
-@app.route('/api/user/<username>')
+@app.route('/user_exists/username')
 def get_user(username):
     user = Users.get_name(username)
     if not user:
@@ -294,7 +293,7 @@ def users():
     return response
 
 
-@app.route('/users/<username>')
+@app.route('/users/username')
 @requires_auth
 def user_profile(username):
     user = Users.get_name(username)
@@ -386,11 +385,4 @@ def present():
         return redirect(url_for('index'))
 
     return render_template('presenter.html')
-
-
-if __name__ == "__main__":
-    # server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
-
-    # server.serve_forever()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5002)
-    # app.run(debug=True, host='0.0.0.0', port=5000)
+</pre>
