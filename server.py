@@ -21,6 +21,7 @@ from flask import (
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_socketio import emit, join_room, send, SocketIO
+from gevent import pywsgi
 from profanity_filter import ProfanityFilter
 import uuid
 
@@ -32,7 +33,8 @@ logger = logging.getLogger(__name__)
 pf = ProfanityFilter(languages=['en'])
 
 app = Flask(__name__)
-app.secret_key = 'My super secret key!'
+with open('./flask_secret_key') as f:
+    app.secret_key = f.read()
 app._static_folder = 'static'
 socketio = SocketIO(app)
 
@@ -116,7 +118,7 @@ challenges = {
         name='Here - Click This',
         description='Use XSS to run your own JavaScript on this page.',
         hint='Some browsers block <script> as a safety measure, but other HTML tags can run JavaScript...',
-        oncomplete='created a malicious XSS link!'
+        oncomplete='injected their own XSS!'
     ),
     'cookies/admin': Challenge(
         name='Look At Me; I Am The Admin Now',
@@ -388,8 +390,8 @@ def present():
 
 
 if __name__ == "__main__":
-    # server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
+    server = pywsgi.WSGIServer(('0.0.0.0', 80), app)
 
-    # server.serve_forever()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5004)
+    server.serve_forever()
+    # socketio.run(app, debug=True, host='0.0.0.0', port=5004)
     # app.run(debug=True, host='0.0.0.0', port=5000)
