@@ -32,7 +32,8 @@ logger = logging.getLogger(__name__)
 pf = ProfanityFilter(languages=['en'])
 
 app = Flask(__name__)
-app.secret_key = 'My super secret key!'
+with open('./flask_secret_key') as f:
+    app.secret_key = f.read()
 app._static_folder = 'static'
 socketio = SocketIO(app)
 
