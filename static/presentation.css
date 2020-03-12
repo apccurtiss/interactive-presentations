@@ -84,7 +84,13 @@
 
 .chat-message {
     flex: 0 0;
-    padding: 0 0 1em 0;
+    padding: .2em;
+    margin-bottom: .5em;
+    border-radius: .5em;
+}
+
+.chat-message.mentions-presenter {
+    background-color: #fdeea1;
 }
 
 .profile-picture {

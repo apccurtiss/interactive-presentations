@@ -5,11 +5,6 @@ socket.on('connect', function() {
 socket.on('disconnect', function() {
     console.warn('Disconnected from socket.')
 });
-socket.on('chat_message', function(message) {
-    if (message.content.indexOf('@presenter') != -1) {
-        onPresenterMention(message);
-    }
-});
 socket.on('achievement', function(data) {
     onAchievement(data);
 });

@@ -35,6 +35,10 @@ chat_message_container.onscroll = () => {
 }
 function addNewMessage(author_username, author_photo, time_str, message_content) {
     let new_message = chat_message_template.content.cloneNode(true);
+    if(message_content.indexOf('@presenter') != -1) {
+        console.log(new_message)
+        new_message.firstElementChild.classList.add('mentions-presenter');
+    }
     
     let new_picture = new_message.getElementById('profile-picture');
     new_picture.setAttribute('src', author_photo);
