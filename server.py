@@ -118,7 +118,7 @@ challenges = {
         name='Here - Click This',
         description='Use XSS to run your own JavaScript on this page.',
         hint='Some browsers block <script> as a safety measure, but other HTML tags can run JavaScript...',
-        oncomplete='created a malicious XSS link!'
+        oncomplete='injected their own XSS!'
     ),
     'cookies/admin': Challenge(
         name='Look At Me; I Am The Admin Now',
