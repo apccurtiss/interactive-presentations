@@ -150,6 +150,10 @@
     transform: translate(0, -100%);
 }
 
+.achievement-text {
+    margin-top: .2em;
+}
+
 /* Follow presenter */
 #follow-presenter {
     position: absolute;
