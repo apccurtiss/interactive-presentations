@@ -286,8 +286,7 @@ def users():
 
     response = make_response(render_template('users.html', error=error, users=Users.get_all()))
     response.headers['Content-Security-Policy-Report-Only'] = (
-        'default-src \'self\';'
-        'script-src \'/static/users.js\';'
+        'script-src \'self\';'
         'report-uri /csp-report;'
     )
     return response
@@ -393,5 +392,5 @@ if __name__ == "__main__":
     # server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
 
     # server.serve_forever()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5003)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5004)
     # app.run(debug=True, host='0.0.0.0', port=5000)
